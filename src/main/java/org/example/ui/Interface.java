@@ -11,7 +11,12 @@ public class Interface extends JFrame {
         setTitle("Interface");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+
         setJMenuBar(new WindowBar(FONT_WINDOWBAR));
+
+        getContentPane().add(new ToolBar(), BorderLayout.PAGE_START);
+
+        
     }
 
 }
