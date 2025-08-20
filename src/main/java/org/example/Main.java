@@ -1,11 +1,14 @@
 package org.example;
 
+import org.example.ui.Interface;
+
+import javax.swing.*;
+
 public class Main {
     public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            Interface window = new Interface();
-            window.setLocationRelativeTo(null); // Centraliza a window
-            window.setVisible(true); // Torna a window visível
+        SwingUtilities.invokeLater(() -> {
+            Interface ui = new Interface();
+            ui.setVisible(true);
         });
     }
 }
