@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             Interface ui = new Interface();
-            ui.setVisible(true);
+            ui.setVisible(args.length == 0 || !args[0].equals("-h"));
         });
     }
 }
