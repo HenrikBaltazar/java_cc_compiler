@@ -6,9 +6,9 @@ import java.awt.*;
 public class WindowBar extends JMenuBar{
     private javax.swing.JMenu jMenuFile, jMenuEdit, jMenuCompile;
     private javax.swing.JMenuItem jMenuItemLoad, jMenuItemUndo, jMenuItemRedo, jMenuItemCompile;
+    private static final Font TEXT_FONT = new Font("Arial", Font.PLAIN, 16);
 
-
-    public WindowBar(Font TEXT_FONT){
+    public WindowBar(){
         jMenuFile = new JMenu("Arquivo");
         jMenuFile.setFont(TEXT_FONT);
         jMenuItemLoad = new JMenuItem("Carregar programa...");
