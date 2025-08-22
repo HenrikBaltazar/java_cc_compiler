@@ -20,7 +20,7 @@ public class ToolBar extends JToolBar{
     private static final ImageIcon ICON_HELP = new ImageIcon(resourcesPath+"icon_help.png");
     private JButton jButtonNewFile,jButtonOpenFile,jButtonSaveFile,jButtonCutText,jButtonCopyText,jButtonPasteText,jButtonBuildCode,jButtonRunCode,jButtonHelp;
 
-    public ToolBar(RSyntaxTextArea textArea) {
+    public ToolBar(RSyntaxTextArea textInput, JTextArea textOutput) {
         setName("ToolBar");
 
         jButtonNewFile = new JButton(ICON_NEW);
@@ -101,7 +101,7 @@ public class ToolBar extends JToolBar{
 
         jButtonHelp.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                help(textArea.getText());
+                help(textInput.getText(), textOutput);
             }
         });
 
@@ -152,8 +152,8 @@ public class ToolBar extends JToolBar{
         JOptionPane.showMessageDialog(parent, "run");
     }
 
-    private void help(String text){
-        JOptionPane.showMessageDialog(parent, text);
+    private void help(String input, JTextArea output){
+        output.setText(input);
     }
 
 }
