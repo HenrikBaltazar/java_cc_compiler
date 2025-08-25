@@ -1,10 +1,12 @@
 package org.example.ui;
 
+import org.example.Actions.FileManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class ToolBar extends JToolBar{
     Window parent = SwingUtilities.getWindowAncestor(this);
@@ -124,9 +126,16 @@ public class ToolBar extends JToolBar{
         JOptionPane.showMessageDialog(parent, "new");
     }
 
-    private void openFile(){
-        JOptionPane.showMessageDialog(parent, "open");
+    private void openFile() {
+        File selectedFile = FileManager.openFileChooser(this);
+        if (selectedFile != null) {
+            JOptionPane.showMessageDialog(parent,
+                    "Arquivo selecionado:\n" + selectedFile.getAbsolutePath(),
+                    "Arquivo aberto",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
     }
+
 
     private void saveFile(){
         JOptionPane.showMessageDialog(parent, "save");
