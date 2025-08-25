@@ -9,7 +9,7 @@ import java.awt.*;
 public class TextOutput extends JPanel {
     private final JTextArea textArea = new JTextArea();
     private static final Font FONT_OUTPUT = new Font("Monospaced", Font.PLAIN, 20);
-    private JLabel RowsColunmLabel = new JLabel("Linha: 0 ; Coluna: 0");
+    private JLabel RowsColunmLabel = new JLabel("Linha: 1 ; Coluna: 1");
     TextOutput(){
         textArea.setRows(20);
         textArea.setColumns(60);
