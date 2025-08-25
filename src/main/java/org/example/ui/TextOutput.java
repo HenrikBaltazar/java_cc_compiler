@@ -9,6 +9,7 @@ import java.awt.*;
 public class TextOutput extends JPanel {
     private final JTextArea textArea = new JTextArea();
     private static final Font FONT_OUTPUT = new Font("Monospaced", Font.PLAIN, 20);
+    private JLabel RowsColunmLabel = new JLabel("Linha: 0 ; Coluna: 0");
     TextOutput(){
         textArea.setRows(20);
         textArea.setColumns(60);
@@ -18,13 +19,18 @@ public class TextOutput extends JPanel {
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setBorder(new EmptyBorder(0, 50, 10, 0));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
+        RowsColunmLabel.setFont(FONT_OUTPUT);
         setLayout(new BorderLayout());
         add(scrollPane,BorderLayout.CENTER);
+        add(RowsColunmLabel,BorderLayout.PAGE_END);
     }
 
     public void setText(String text){
         textArea.setText(text);
+    }
+
+    public void updateRowsColunm(int rows, int column){
+        RowsColunmLabel.setText("Linha: " + rows + " ; Coluna: " + column);
     }
 
     public JTextArea getTextArea() {

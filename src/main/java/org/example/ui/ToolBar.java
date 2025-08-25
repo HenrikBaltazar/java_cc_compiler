@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ToolBar extends JToolBar{
     Window parent = SwingUtilities.getWindowAncestor(this);
@@ -22,7 +24,7 @@ public class ToolBar extends JToolBar{
     private static final ImageIcon ICON_HELP = new ImageIcon(resourcesPath+"icon_help.png");
     private JButton jButtonNewFile,jButtonOpenFile,jButtonSaveFile,jButtonCutText,jButtonCopyText,jButtonPasteText,jButtonBuildCode,jButtonRunCode,jButtonHelp;
 
-    public ToolBar(RSyntaxTextArea textInput, JTextArea textOutput) {
+    public ToolBar(TextInput textInput, JTextArea textOutput, FileManager fileManager, Interface classParent) {
         setName("ToolBar");
 
         jButtonNewFile = new JButton(ICON_NEW);
@@ -55,19 +57,19 @@ public class ToolBar extends JToolBar{
 
         jButtonNewFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                newFile();
+                newFile(textInput, classParent, fileManager);
             }
         });
 
         jButtonOpenFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                openFile();
+                openFile(fileManager, textInput, classParent);
             }
         });
 
         jButtonSaveFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveFile();
+                saveFile(fileManager,parent,classParent,textInput);
             }
         });
 
@@ -103,7 +105,7 @@ public class ToolBar extends JToolBar{
 
         jButtonHelp.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                help(textInput.getText(), textOutput);
+                help(textInput.getTextArea().getText(), textOutput);
             }
         });
 
@@ -122,23 +124,48 @@ public class ToolBar extends JToolBar{
         add(jButtonHelp);
     }
 
-    private void newFile(){
-        JOptionPane.showMessageDialog(parent, "new");
+    private void newFile(TextInput textInput, Interface classParent, FileManager fileManager) {
+        if(!fileManager.isFileSaved()){
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    "O arquivo ainda não foi salvo, deseja salvar o arquivo?",
+                    "Confirmar novo arquivo",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (option == JOptionPane.YES_OPTION){
+                int file = fileManager.saveFile(this,textInput.getText(),classParent);
+                if( file != 1){
+                    newFile(textInput, classParent, fileManager);
+                }
+            }
+        }
+        fileManager.setFileSaved(true,classParent);
+        fileManager.setFilePath(null);
+        textInput.setInputText("");
+        textInput.setRow(0);
+        textInput.setCol(0);
+        classParent.setWindowTitle("Compilador");
+
     }
 
-    private void openFile() {
-        File selectedFile = FileManager.openFileChooser(this);
+    private void openFile(FileManager fileManager, TextInput textInput, Interface classParent) {
+        File selectedFile = fileManager.openFileChooser(this,classParent);
+        String text = "";
         if (selectedFile != null) {
-            JOptionPane.showMessageDialog(parent,
-                    "Arquivo selecionado:\n" + selectedFile.getAbsolutePath(),
-                    "Arquivo aberto",
-                    JOptionPane.INFORMATION_MESSAGE);
+            try {
+                text = Files.readString(selectedFile.toPath());
+            }catch(Exception e) {
+                System.out.println("Erro ao abrir arquivo");
+            }
+
+            textInput.setInputText(text);
         }
     }
 
 
-    private void saveFile(){
-        JOptionPane.showMessageDialog(parent, "save");
+    private void saveFile(FileManager fileManager, Component parent, Interface classParent, TextInput textInput) {
+        int file = fileManager.saveFile(parent,textInput.getText(),classParent);
     }
 
     private void cutText(){
