@@ -2,13 +2,15 @@ package org.example.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class WindowBar extends JMenuBar{
     private javax.swing.JMenu jMenuFile, jMenuEdit, jMenuCompile;
     private javax.swing.JMenuItem jMenuItemLoad, jMenuItemUndo, jMenuItemRedo, jMenuItemCompile;
     private static final Font TEXT_FONT = new Font("Arial", Font.PLAIN, 16);
 
-    public WindowBar(){
+    public WindowBar(Interface parent){
         jMenuFile = new JMenu("Arquivo");
         jMenuFile.setFont(TEXT_FONT);
         jMenuItemLoad = new JMenuItem("Carregar programa...");
@@ -33,5 +35,12 @@ public class WindowBar extends JMenuBar{
         add(jMenuFile);
         add(jMenuEdit);
         add(jMenuCompile);
+
+        jMenuItemLoad.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.getToolBar().openFile(parent.getFileManager(),parent.getTextInput(),parent);
+            }
+        });
     }
 }

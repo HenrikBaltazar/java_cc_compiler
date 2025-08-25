@@ -17,7 +17,7 @@ public class TextInput extends JPanel {
     private RSyntaxTextArea textArea;
     private static final Font EDITOR_FONT = new Font("Monospaced", Font.PLAIN, 20);
     private int row=0, col=0;
-    public TextInput(FileManager fileManager, Interface parent, TextOutput textOutput) {
+    public TextInput(Interface parent) {
         setLayout(new BorderLayout());
 
         textArea = new RSyntaxTextArea(20, 60);
@@ -26,20 +26,29 @@ public class TextInput extends JPanel {
         textArea.setFont(EDITOR_FONT);
         textArea.setAntiAliasingEnabled(true);
         textArea.setAutoIndentEnabled(true);
+        SwingUtilities.invokeLater(() -> textArea.requestFocusInWindow());
 
         textArea.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         textArea.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if(fileManager.isFileSaved()){
-                    fileManager.setFileSaved(false,parent);
+                if(parent.getFileManager().isFileSaved()){
+                    parent.getFileManager().setFileSaved(false,parent);
                 }
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-
+                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S){
+                    parent.getToolBar().saveFile(parent.getFileManager(),parent,parent,TextInput.this);
+                }
+                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N){
+                    parent.getToolBar().newFile(TextInput.this,parent,parent.getFileManager());
+                }
+                if(e.isControlDown() && e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_A){
+                    parent.getToolBar().openFile(parent.getFileManager(),TextInput.this,parent);
+                }
             }
 
             @Override
@@ -53,7 +62,7 @@ public class TextInput extends JPanel {
 
                     setRow(row);
                     setCol(col);
-                    textOutput.updateRowsColunm(row, col);
+                    parent.getTextOutput().updateRowsColunm(row, col);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -73,6 +82,7 @@ public class TextInput extends JPanel {
         this.col = col;
     }
 
+
     public RSyntaxTextArea getTextArea() {
         return textArea;
     }
@@ -84,4 +94,6 @@ public class TextInput extends JPanel {
     public void setInputText(String input) {
         textArea.setText(input);
     }
+
+
 }
