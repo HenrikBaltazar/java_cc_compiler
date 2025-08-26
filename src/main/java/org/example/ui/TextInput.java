@@ -2,10 +2,7 @@ package org.example.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import javax.swing.border.EmptyBorder;
 
@@ -53,21 +50,36 @@ public class TextInput extends JPanel {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                try {
-                    int caretPos = textArea.getCaretPosition();
-
-                    int row = textArea.getLineOfOffset(caretPos) + 1;
-
-                    int col = caretPos - textArea.getLineStartOffset(row - 1) + 1;
-
-                    setRow(row);
-                    setCol(col);
-                    parent.getTextOutput().updateRowsColunm(row, col);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                updatePosition(parent);
             }
 
+        });
+
+        textArea.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                updatePosition(parent);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
         });
 
         RTextScrollPane scrollPane = new RTextScrollPane(textArea);
@@ -82,6 +94,21 @@ public class TextInput extends JPanel {
         this.col = col;
     }
 
+    public void updatePosition(Interface parent){
+        try {
+            int caretPos = textArea.getCaretPosition();
+
+            int row = textArea.getLineOfOffset(caretPos) + 1;
+
+            int col = caretPos - textArea.getLineStartOffset(row - 1) + 1;
+
+            setRow(row);
+            setCol(col);
+            parent.getTextOutput().updateRowsColunm(row, col);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public RSyntaxTextArea getTextArea() {
         return textArea;
