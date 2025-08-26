@@ -119,17 +119,42 @@ public class ToolBar extends JToolBar{
         add(jButtonRunCode);
         addSeparator();
         add(jButtonHelp);
+
+        this.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(parent.getShortcut().saveFile(e)){
+                    parent.getToolBar().saveFile(parent);
+                }
+                if(parent.getShortcut().newFile(e)){
+                    parent.getToolBar().newFile(parent);
+                }
+                if(parent.getShortcut().openFile(e)){
+                    parent.getToolBar().openFile(parent);
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+        });
     }
 
     public void newFile(Interface parent) {
-        if(parent.getFileManager().saveInSecondChance(parent)){
-            parent.getFileManager().setFileSaved(true,parent);
-            parent.getFileManager().setFilePath(null);
-            parent.getTextInput().setInputText("");
-            parent.getTextInput().setRow(0);
-            parent.getTextInput().setCol(0);
-            parent.setWindowTitle("Compilador");
-        }
+        parent.getFileManager().saveInSecondChance(parent);
+        parent.getFileManager().setFileSaved(true,parent);
+        parent.getFileManager().setFilePath(null);
+        parent.getTextInput().setInputText("");
+        parent.getTextInput().setRow(0);
+        parent.getTextInput().setCol(0);
+        parent.setWindowTitle("Compilador");
     }
 
     public void openFile(Interface parent) {

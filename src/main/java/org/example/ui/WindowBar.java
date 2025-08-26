@@ -42,5 +42,20 @@ public class WindowBar extends JMenuBar{
                 parent.getToolBar().openFile(parent);
             }
         });
+
+        jMenuItemUndo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.getTextInput().getTextArea().undoLastAction();
+            }
+        });
+
+        jMenuItemRedo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.getTextInput().getTextArea().redoLastAction();
+            }
+        });
+
     }
 }

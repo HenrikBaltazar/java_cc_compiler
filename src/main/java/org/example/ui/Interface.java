@@ -1,5 +1,6 @@
 package org.example.ui;
 import org.example.Actions.FileManager;
+import org.example.Actions.Shortcut;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -15,11 +16,13 @@ public class Interface extends JFrame {
     private FileManager fileManager;
     private ToolBar toolBar;
     private String windowTitle = "Compilador";
+    private Shortcut shortcut;
     public Interface(){
         fileManager = new FileManager();
         textOutput = new TextOutput();
         textInput = new TextInput(this);
         toolBar = new ToolBar(this);
+        shortcut = new Shortcut();
         setMinimumSize(new Dimension(W,H));
         setTitle(windowTitle);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -78,6 +81,10 @@ public class Interface extends JFrame {
 
     public FileManager getFileManager() {
         return fileManager;
+    }
+
+    public Shortcut getShortcut() {
+        return shortcut;
     }
 
 }

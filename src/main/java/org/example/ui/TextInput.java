@@ -40,13 +40,13 @@ public class TextInput extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S){
+                if(parent.getShortcut().saveFile(e)){
                     parent.getToolBar().saveFile(parent);
                 }
-                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N){
+                if(parent.getShortcut().newFile(e)){
                     parent.getToolBar().newFile(parent);
                 }
-                if(e.isControlDown() && e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_A){
+                if(parent.getShortcut().openFile(e)){
                     parent.getToolBar().openFile(parent);
                 }
             }
