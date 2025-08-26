@@ -37,7 +37,7 @@ public class FileManager {
         return null;
     }
 
-    public int saveFile(Component parent, String text, Interface classParent) {
+    public int saveFile(Interface parent) {
         JFileChooser fileChooser = new JFileChooser(new java.io.File("resources"));
         fileChooser.setPreferredSize(new Dimension(800, 600));
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -51,8 +51,8 @@ public class FileManager {
                 selectedDir = new File(selectedDir.getAbsolutePath()+".txt");
             }
             try(FileWriter fw = new FileWriter(selectedDir)) {
-                fw.write(text);
-                classParent.setWindowTitle("Compilador"+" - "+selectedDir.getName());
+                fw.write(parent.getTextInput().getText());
+                parent.setWindowTitle("Compilador"+" - "+selectedDir.getName());
                 JOptionPane.showMessageDialog(parent,"Arquivo salvo em "+selectedDir.getAbsolutePath()+" com sucesso!");
                 this.isFileSaved = true;
                 this.filePath = selectedDir.toPath();

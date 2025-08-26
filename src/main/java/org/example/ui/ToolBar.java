@@ -54,19 +54,19 @@ public class ToolBar extends JToolBar{
 
         jButtonNewFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                newFile(parent.getTextInput(), parent, parent.getFileManager());
+                newFile(parent);
             }
         });
 
         jButtonOpenFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                openFile(parent.getFileManager(), parent.getTextInput(), parent);
+                openFile(parent);
             }
         });
 
         jButtonSaveFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveFile(parent.getFileManager(), parent,parent,parent.getTextInput());
+                saveFile(parent);
             }
         });
 
@@ -121,8 +121,8 @@ public class ToolBar extends JToolBar{
         add(jButtonHelp);
     }
 
-    public void newFile(TextInput textInput, Interface classParent, FileManager fileManager) {
-        if(!fileManager.isFileSaved()){
+    public void newFile(Interface parent) {
+        if(!parent.getFileManager().isFileSaved()){
             int option = JOptionPane.showConfirmDialog(
                     this,
                     "O arquivo ainda não foi salvo, deseja salvar o arquivo?",
@@ -131,23 +131,23 @@ public class ToolBar extends JToolBar{
                     JOptionPane.QUESTION_MESSAGE
             );
             if (option == JOptionPane.YES_OPTION){
-                int file = fileManager.saveFile(this,textInput.getText(),classParent);
+                int file = parent.getFileManager().saveFile(parent);
                 if( file != 1){
-                    newFile(textInput, classParent, fileManager);
+                    newFile(parent);
                 }
             }
         }
-        fileManager.setFileSaved(true,classParent);
-        fileManager.setFilePath(null);
-        textInput.setInputText("");
-        textInput.setRow(0);
-        textInput.setCol(0);
-        classParent.setWindowTitle("Compilador");
+        parent.getFileManager().setFileSaved(true,parent);
+        parent.getFileManager().setFilePath(null);
+        parent.getTextInput().setInputText("");
+        parent.getTextInput().setRow(0);
+        parent.getTextInput().setCol(0);
+        parent.setWindowTitle("Compilador");
 
     }
 
-    public void openFile(FileManager fileManager, TextInput textInput, Interface classParent) {
-        File selectedFile = fileManager.openFileChooser(this,classParent);
+    public void openFile(Interface parent) {
+        File selectedFile = parent.getFileManager().openFileChooser(this,parent);
         String text = "";
         if (selectedFile != null) {
             try {
@@ -156,13 +156,13 @@ public class ToolBar extends JToolBar{
                 System.out.println("Erro ao abrir arquivo");
             }
 
-            textInput.setInputText(text);
+            parent.getTextInput().setInputText(text);
         }
     }
 
 
-    public void saveFile(FileManager fileManager, Component parent, Interface classParent, TextInput textInput) {
-        int file = fileManager.saveFile(parent,textInput.getText(),classParent);
+    public void saveFile(Interface parent) {
+        int file = parent.getFileManager().saveFile(parent);
     }
 
     public void cutText(Interface parent) {

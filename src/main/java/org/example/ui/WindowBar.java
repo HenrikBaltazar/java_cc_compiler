@@ -39,7 +39,7 @@ public class WindowBar extends JMenuBar{
         jMenuItemLoad.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                parent.getToolBar().openFile(parent.getFileManager(),parent.getTextInput(),parent);
+                parent.getToolBar().openFile(parent);
             }
         });
     }

@@ -67,7 +67,7 @@ public class Interface extends JFrame {
                     JOptionPane.QUESTION_MESSAGE
             );
             if (option == JOptionPane.YES_OPTION){
-                int file = fileManager.saveFile(this,textInput.getText(),this);
+                int file = fileManager.saveFile(this);
                 if( file == 1){
                     return DO_NOTHING_ON_CLOSE;
                 }
