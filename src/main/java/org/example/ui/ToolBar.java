@@ -122,28 +122,14 @@ public class ToolBar extends JToolBar{
     }
 
     public void newFile(Interface parent) {
-        if(!parent.getFileManager().isFileSaved()){
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    "O arquivo ainda não foi salvo, deseja salvar o arquivo?",
-                    "Confirmar novo arquivo",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE
-            );
-            if (option == JOptionPane.YES_OPTION){
-                int file = parent.getFileManager().saveFile(parent);
-                if( file != 1){
-                    newFile(parent);
-                }
-            }
+        if(parent.getFileManager().saveInSecondChance(parent)){
+            parent.getFileManager().setFileSaved(true,parent);
+            parent.getFileManager().setFilePath(null);
+            parent.getTextInput().setInputText("");
+            parent.getTextInput().setRow(0);
+            parent.getTextInput().setCol(0);
+            parent.setWindowTitle("Compilador");
         }
-        parent.getFileManager().setFileSaved(true,parent);
-        parent.getFileManager().setFilePath(null);
-        parent.getTextInput().setInputText("");
-        parent.getTextInput().setRow(0);
-        parent.getTextInput().setCol(0);
-        parent.setWindowTitle("Compilador");
-
     }
 
     public void openFile(Interface parent) {

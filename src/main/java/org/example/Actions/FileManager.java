@@ -13,26 +13,29 @@ public class FileManager {
     private Path filePath;
     private boolean isFileSaved = true;
     public File openFileChooser(Component parent, Interface classParent) {
-        JFileChooser fileChooser = new JFileChooser(new java.io.File("resources"));
-        fileChooser.setPreferredSize(new Dimension(800, 600));
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setDialogTitle("Selecione o Programa");
-        fileChooser.setApproveButtonText("Abrir");
+        if(saveInSecondChance(classParent)){
+            JFileChooser fileChooser = new JFileChooser(new java.io.File("resources"));
+            fileChooser.setPreferredSize(new Dimension(800, 600));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setDialogTitle("Selecione o Programa");
+            fileChooser.setApproveButtonText("Abrir");
 
-        int returnValue = fileChooser.showOpenDialog(parent);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            if (selectedFile.getPath().endsWith(".txt")) {
-                this.filePath = selectedFile.toPath();
-                this.isFileSaved = true;
-                classParent.setWindowTitle(classParent.getWindowTitle()+" - "+selectedFile.getName());
-                return selectedFile;
-            } else {
-                JOptionPane.showMessageDialog(parent,
-                        "Arquivo deve ser do tipo TXT",
-                        "Erro",
-                        JOptionPane.ERROR_MESSAGE);
+            int returnValue = fileChooser.showOpenDialog(parent);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                if (selectedFile.getPath().endsWith(".txt")) {
+                    this.filePath = selectedFile.toPath();
+                    this.isFileSaved = true;
+                    classParent.setWindowTitle("Compilador - "+selectedFile.getName());
+                    return selectedFile;
+                } else {
+                    JOptionPane.showMessageDialog(parent,
+                            "Arquivo deve ser do tipo TXT",
+                            "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
+            return null;
         }
         return null;
     }
@@ -63,6 +66,28 @@ public class FileManager {
             return 1;
         }
         return 0;
+    }
+
+    public boolean saveInSecondChance(Interface parent) {
+        if (!this.isFileSaved) {
+            int option = JOptionPane.showConfirmDialog(
+                    parent,
+                    "O arquivo ainda não foi salvo, deseja salvar o arquivo?",
+                    "Confirmar novo arquivo",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (option == JOptionPane.YES_OPTION){
+                int file = saveFile(parent);
+                if( file != 1){
+                    saveInSecondChance(parent);
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return true;
     }
 
     public Path getFilePath() {

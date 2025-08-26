@@ -58,22 +58,10 @@ public class Interface extends JFrame {
     }
 
     private int checkExit(){
-        if(!fileManager.isFileSaved()){
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    "Deseja salvar o arquivo antes de sair?",
-                    "Confirmar saída",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE
-            );
-            if (option == JOptionPane.YES_OPTION){
-                int file = fileManager.saveFile(this);
-                if( file == 1){
-                    return DO_NOTHING_ON_CLOSE;
-                }
-            }
-        }
+        if(fileManager.saveInSecondChance(this)){
             return EXIT_ON_CLOSE;
+        }
+        return DO_NOTHING_ON_CLOSE;
     }
 
     public ToolBar getToolBar() {
