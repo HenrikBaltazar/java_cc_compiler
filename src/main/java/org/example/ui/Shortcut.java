@@ -1,9 +1,21 @@
-package org.example.Actions;
+package org.example.ui;
 
 import java.awt.event.KeyEvent;
 
 public class Shortcut {
     public Shortcut() {}
+
+    public void Detect(Interface parent, KeyEvent e){
+        if(saveFile(e)){
+            parent.getToolBar().saveFile(parent);
+        }
+        if(newFile(e)){
+            parent.getToolBar().newFile(parent);
+        }
+        if(openFile(e)){
+            parent.getToolBar().openFile(parent);
+        }
+    }
 
     public boolean saveFile(KeyEvent e){
         if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S){

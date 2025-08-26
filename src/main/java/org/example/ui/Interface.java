@@ -1,10 +1,8 @@
 package org.example.ui;
+import org.example.Actions.Build;
 import org.example.Actions.FileManager;
-import org.example.Actions.Shortcut;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
@@ -17,7 +15,9 @@ public class Interface extends JFrame {
     private ToolBar toolBar;
     private String windowTitle = "Compilador";
     private Shortcut shortcut;
-    public Interface(){
+    public Build build;
+    public Interface(Build build) {
+        this.build = build;
         fileManager = new FileManager();
         textOutput = new TextOutput();
         textInput = new TextInput(this);

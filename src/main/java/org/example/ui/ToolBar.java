@@ -90,13 +90,13 @@ public class ToolBar extends JToolBar{
 
         jButtonBuildCode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                buildCode();
+                buildCode(parent);
             }
         });
 
         jButtonRunCode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                runCode();
+                runCode(parent);
             }
         });
 
@@ -128,15 +128,7 @@ public class ToolBar extends JToolBar{
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if(parent.getShortcut().saveFile(e)){
-                    parent.getToolBar().saveFile(parent);
-                }
-                if(parent.getShortcut().newFile(e)){
-                    parent.getToolBar().newFile(parent);
-                }
-                if(parent.getShortcut().openFile(e)){
-                    parent.getToolBar().openFile(parent);
-                }
+                parent.getShortcut().Detect(parent,e);
             }
 
             @Override
@@ -188,12 +180,13 @@ public class ToolBar extends JToolBar{
         parent.getTextInput().getTextArea().paste();
     }
 
-    public void buildCode(){
-        //JOptionPane.showMessageDialog(parent, "build");
+    public void buildCode(Interface parent){
+        parent.build.buildCode();
+        JOptionPane.showMessageDialog(parent, "build");
     }
 
-    public void runCode(){
-        //JOptionPane.showMessageDialog(parent, "run");
+    public void runCode(Interface parent){
+        JOptionPane.showMessageDialog(parent, "build");
     }
 
     public void help(Interface parent) {

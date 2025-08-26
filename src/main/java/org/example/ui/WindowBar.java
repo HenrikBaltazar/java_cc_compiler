@@ -57,5 +57,12 @@ public class WindowBar extends JMenuBar{
             }
         });
 
+        jMenuItemCompile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.getToolBar().buildCode(parent);
+            }
+        });
+
     }
 }

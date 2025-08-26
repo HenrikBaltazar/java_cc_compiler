@@ -37,15 +37,7 @@ public class TextInput extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if(parent.getShortcut().saveFile(e)){
-                    parent.getToolBar().saveFile(parent);
-                }
-                if(parent.getShortcut().newFile(e)){
-                    parent.getToolBar().newFile(parent);
-                }
-                if(parent.getShortcut().openFile(e)){
-                    parent.getToolBar().openFile(parent);
-                }
+                parent.getShortcut().Detect(parent,e);
             }
 
             @Override
