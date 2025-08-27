@@ -12,6 +12,7 @@ public class Build {
     }
 
     public void buildCode(){
+
         parent.getTextOutput().setText(parent.getTextInput().getText());
     }
 

@@ -8,7 +8,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 public class Interface extends JFrame {
-    private static final int W = 1920, H = 1080;
+    private static final int W = 800, H = 600;
     private TextInput textInput;
     private TextOutput textOutput;
     private FileManager fileManager;
@@ -16,6 +16,7 @@ public class Interface extends JFrame {
     private String windowTitle = "Compilador";
     private Shortcut shortcut;
     public Build build;
+    private JDialog jHelpDialog;
     public Interface(Build build) {
         this.build = build;
         fileManager = new FileManager();
@@ -41,9 +42,9 @@ public class Interface extends JFrame {
                 JSplitPane.VERTICAL_SPLIT,
                 textInput, textOutput
         );
-        splitPane.setDividerLocation(1200);
+        splitPane.setDividerLocation(950);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setResizeWeight(0.7);
+        splitPane.setResizeWeight(0.5);
 
         setJMenuBar(new WindowBar(this));
         getContentPane().add(toolBar, BorderLayout.PAGE_START);
@@ -85,6 +86,18 @@ public class Interface extends JFrame {
 
     public Shortcut getShortcut() {
         return shortcut;
+    }
+
+    public void openHelpWindow() {
+        jHelpDialog = new JDialog(this, "Ajuda", true);
+        jHelpDialog.setLocationRelativeTo(this);
+        jHelpDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        jHelpDialog.setMinimumSize(new Dimension(W,H));
+        jHelpDialog.setResizable(false);
+        JLabel jHelpLabel = new JLabel("Me ajuda pelo amor de deus");
+        jHelpLabel.setVisible(true);
+        jHelpDialog.add(jHelpLabel, BorderLayout.PAGE_START);
+        jHelpDialog.setVisible(true);
     }
 
 }

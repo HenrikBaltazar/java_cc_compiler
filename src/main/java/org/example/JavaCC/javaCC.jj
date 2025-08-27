@@ -1,0 +1,78 @@
+PARSER_BEGIN(Language2025x2)
+
+import java.text.ParseException;public class Language2025x2 {
+    public static void main(String[] args) throws ParseException{
+    Language2025x2 parser = new Language2025x2(System.in);
+    parser.Program();
+    }
+}
+
+PARSER_END(Language2025x2)
+
+    SKIP: {
+          " "
+        | "\n"
+        | "\r"
+        | "\t"
+    }
+
+    TOKEN : {
+        <BEGIN: "begin">
+        | <DEFINE: "define">
+        | <START: "start">
+        | <END: "end">
+        | <SET: "set">
+        | <TYPE_NUM: "num">
+        | <TYPE_REAL: "real">
+        | <TYPE_TEXT: "text">
+        | <TYPE_FLAG: "flag">
+        | <TEXT : "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* "\"">
+        | <NUM: ( ["0"-"9"] )+>
+        | <REAL: ( ["0"-"9"] )+ "." ( ["0"-"9"] )+>
+        | <FLAG: "false" | "true">
+        | <READ: "read">
+        | <SHOW: "show">
+        | <IF: "if">
+        | <THEN: "then">
+        | <ELSE: "else">
+        | <TRUE: "true">
+        | <FALSE: "false">
+
+        | < EQUAL: "==" >
+        | < NOT_EQUAL: "!=" >
+        | < SEMICOLON: ";" >
+        | < ASSIGN: "=" >
+        | < COLON: ":" >
+        | < COMMA: "," >
+        | < DOT: "." >
+        | < LBRACE: "{" >
+        | < RBRACE: "}" >
+        | < LBRACKET: "[" >
+        | < RBRACKET: "]" >
+        | < LPAREN: "(" >
+        | < RPAREN: ")" >
+        | < PLUS: "+" >
+        | < MINUS: "-" >
+        | < SHIFT_RIGHT_ASSIGN: ">>=" >
+        | < STAR: "*" >
+        | < SLASH: "/" >
+        | < PERCENT: "%" >
+        | < POWER: "**" >
+        | < DOUBLE_PERCENT: "%%" >
+        | < SHIFT_LEFT: "<<" >
+        | < SHIFT_RIGHT: ">>" >
+        | < SHIFT_LEFT_ASSIGN: "<<=" >
+        | < EXCLAMATION: "!" >
+        | < PIPE: "|" >
+        | < AMPERSAND: "&" >
+    }
+
+    SPECIAL_TOKEN :
+    {
+      <SINGLE_LINE_COMMENT: "#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+      | < BLOCK_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" >
+    }
+
+
+
+

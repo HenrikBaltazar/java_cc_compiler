@@ -3,10 +3,8 @@ package org.example.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import javax.swing.border.EmptyBorder;
 
-import org.example.Actions.FileManager;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;
 
@@ -18,7 +16,19 @@ public class TextInput extends JPanel {
         setLayout(new BorderLayout());
 
         textArea = new RSyntaxTextArea(20, 60);
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+
+        AbstractTokenMakerFactory atmf =
+                (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
+        atmf.putMapping("text/language2025x2",
+                "org.example.ui.syntax.Language2025x2TokenMaker");
+
+        textArea.setSyntaxEditingStyle("text/language2025x2");
+        SyntaxScheme scheme = textArea.getSyntaxScheme();
+        scheme.getStyle(Token.RESERVED_WORD).foreground = Color.BLUE;
+        scheme.getStyle(Token.IDENTIFIER).foreground = Color.BLACK;
+        scheme.getStyle(Token.LITERAL_NUMBER_DECIMAL_INT).foreground = new Color(180, 0, 0);
+        scheme.getStyle(Token.COMMENT_EOL).foreground = Color.GRAY;
+
         textArea.setCodeFoldingEnabled(true);
         textArea.setFont(EDITOR_FONT);
         textArea.setAntiAliasingEnabled(true);
