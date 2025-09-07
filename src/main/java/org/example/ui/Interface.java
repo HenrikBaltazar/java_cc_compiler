@@ -17,10 +17,13 @@ public class Interface extends JFrame {
     private Shortcut shortcut;
     public Build build;
     private JDialog jHelpDialog;
-    private String ajuda = "ATALHOS:\n" +
-            "CTRL+S: SALVAR\n" +
-            "CTRL+SHIFT+A: ABRIR ARQUIVO\n" +
-            "CTRL+N: NOVO ARQUIVO";
+    private static String ajuda =
+            "<html><body style='font-family: sans-serif;'>" +
+                    "<h3>ATALHOS:</h3>" +
+                    "CTRL+S: SALVAR<br>" +
+                    "CTRL+SHIFT+A: ABRIR ARQUIVO<br>" +
+                    "CTRL+N: NOVO ARQUIVO<br>" +
+                    "</body></html>";
     public Interface(Build build) {
         this.build = build;
         fileManager = new FileManager(this);

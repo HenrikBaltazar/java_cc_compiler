@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Maven__com_fifesoft_rsyntaxtextarea_3_5_3">
+    <output-path>$PROJECT_DIR$/out/artifacts/Maven__com_fifesoft_rsyntaxtextarea_3_5_3</output-path>
+    <root id="archive" name="Maven__com_fifesoft_rsyntaxtextarea_3_5_3.jar">
+      <element id="library" level="project" name="Maven: com.fifesoft:rsyntaxtextarea:3.5.3" />
+    </root>
+  </artifact>
+</component>

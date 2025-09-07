@@ -42,7 +42,7 @@ TOKEN : {
     | <WHILE: "while">
 
     | <TEXT : "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* "\"">
-    | <REAL: ( ["0"-"9"] )+ "." ( ["0"-"9"] )+>
+    | <REAL: ( ["0"-"9"] )+ "." ( ["0"-"9"] | ["0"-"9"]["0"-"9"])>
     | <NUM: ( ["0"-"9"] )+>
 
     | <EQUAL: "==">
@@ -77,6 +77,6 @@ TOKEN : {
     | <ERROR_IDENTIFIER_START_WITH_NUM: ["0"-"9"]( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
     | <ERROR_UNTERMINATED_STRING: "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* ("\n" | "\r" | "\r\n") >
     | <ERROR_UNTERMINATED_COMMENT: "/*" (~[])* >
-    | <INVALID_SYMBOL: ~[]>
-
+    | <ERROR_INVALID_NUMBER: ( ["0"-"9"] )* "." ( ["0"-"9"] )* "." ( ["0"-"9"] )* >
+    | <ERROR_INVALID_SYMBOL: ~[]>
 }

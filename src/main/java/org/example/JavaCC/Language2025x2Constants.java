@@ -119,7 +119,9 @@ public interface Language2025x2Constants {
   /** RegularExpression Id. */
   int ERROR_UNTERMINATED_COMMENT = 58;
   /** RegularExpression Id. */
-  int INVALID_SYMBOL = 59;
+  int ERROR_INVALID_NUMBER = 59;
+  /** RegularExpression Id. */
+  int ERROR_INVALID_SYMBOL = 60;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -185,7 +187,8 @@ public interface Language2025x2Constants {
     "<ERROR_IDENTIFIER_START_WITH_NUM>",
     "<ERROR_UNTERMINATED_STRING>",
     "<ERROR_UNTERMINATED_COMMENT>",
-    "<INVALID_SYMBOL>",
+    "<ERROR_INVALID_NUMBER>",
+    "<ERROR_INVALID_SYMBOL>",
   };
 
 }

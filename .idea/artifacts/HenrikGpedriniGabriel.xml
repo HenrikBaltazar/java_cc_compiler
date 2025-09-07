@@ -1,6 +1,13 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="HenrikGpedriniGabriel">
+  <artifact type="jar" build-on-make="true" name="HenrikGpedriniGabriel">
     <output-path>$PROJECT_DIR$/out/artifacts/HenrikGpedriniGabriel</output-path>
-    <root id="archive" name="HenrikGpedriniGabriel.jar" />
+    <root id="archive" name="HenrikGpedriniGabriel.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="Henrik_GustavoPedrini_GabrielVictor" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/fifesoft/rsyntaxtextarea/3.5.3/rsyntaxtextarea-3.5.3.jar" path-in-jar="/" />
+      <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
+    </root>
   </artifact>
 </component>

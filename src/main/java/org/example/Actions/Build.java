@@ -37,7 +37,7 @@ public class Build {
             return "CONSTANTE NUMERICA INTEIRA";
         } else if (category.equals("<REAL>")) {
             return "CONSTANTE NUMERICA REAL";
-        } else if (category.equals("<INVALID_SYMBOL>")) {
+        } else if (category.equals("<ERROR_INVALID_SYMBOL>")) {
             return "ERRO LÉXICO: símbolo inválido";
         } else if (category.equals("<ERROR_UNTERMINATED_STRING>")) {
            return "ERRO LÉXICO: constante literal não finalizada";
@@ -47,6 +47,8 @@ public class Build {
             return "ERRO LÉXICO: comentario de bloco não finalizado";
         }else if (category.equals("<TEXT>")) {
             return "CONSTANTE DE TEXTO";
+        }else if (category.equals("<ERROR_INVALID_NUMBER>")) {
+            return "ERRO LÉXICO: constante numérica inválida";
         }
         return category;
     }
