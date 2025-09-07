@@ -29,6 +29,10 @@ public class TextOutput extends JPanel {
         textArea.setText(text);
     }
 
+    public String getText(){
+        return textArea.getText();
+    }
+
     public void updateRowsColunm(int rows, int column){
         RowsColunmLabel.setText("Linha: " + rows + " ; Coluna: " + column);
     }

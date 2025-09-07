@@ -1,0 +1,84 @@
+options {
+    IGNORE_CASE = true;
+    STATIC = false;
+}
+
+PARSER_BEGIN(Language2025x2)
+package org.example.JavaCC;
+public class Language2025x2 {}
+
+PARSER_END(Language2025x2)
+
+SKIP: {
+      " "
+    | "\n"
+    | "\r"
+    | "\t"
+}
+
+TOKEN : {
+    <BEGIN: "begin">
+    | <DEFINE: "define">
+    | <START: "start">
+    | <END: "end">
+    | <SET: "set">
+    | <TYPE_NUM: "num">
+    | <TYPE_REAL: "real">
+    | <TYPE_TEXT: "text">
+    | <TYPE_FLAG: "flag">
+    | <READ: "read">
+    | <SHOW: "show">
+    | <IF: "if">
+    | <THEN: "then">
+    | <ELSE: "else">
+    | <TRUE: "true">
+    | <FALSE: "false">
+    | <LOOP: "loop">
+    | <WHILE: "while">
+
+    | <TEXT : "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* "\"">
+    | <REAL: ( ["0"-"9"] )+ "." ( ["0"-"9"] )+>
+    | <NUM: ( ["0"-"9"] )+>
+
+    | <EQUAL: "==">
+    | <NOT_EQUAL: "!=">
+    | <SEMICOLON: ";">
+    | <ASSIGN: "=">
+    | <COLON: ":">
+    | <COMMA: ",">
+    | <DOT: ".">
+    | <LBRACE: "{">
+    | <RBRACE: "}">
+    | <LBRACKET: "[">
+    | <RBRACKET: "]">
+    | <LPAREN: "(">
+    | <RPAREN: ")">
+    | <PLUS: "+">
+    | <MINUS: "-">
+    | <SHIFT_RIGHT_ASSIGN: ">>=">
+    | <STAR: "*">
+    | <SLASH: "/">
+    | <PERCENT: "%">
+    | <POWER: "**">
+    | <DOUBLE_PERCENT: "%%">
+    | <SHIFT_LEFT: "<<">
+    | <SHIFT_RIGHT: ">>">
+    | <SHIFT_LEFT_ASSIGN: "<<=">
+    | <EXCLAMATION: "!">
+    | <PIPE: "|">
+    | <AMPERSAND: "&">
+
+    | <IDENTIFIER: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
+    | <ERROR_UNTERMINATED_STRING: "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* ("\n" | "\r" | "\r\n") >
+    | <INVALID_SYMBOL: ~[]>
+}
+
+    SPECIAL_TOKEN :
+    {
+      <SINGLE_LINE_COMMENT: "#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+      | < BLOCK_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" >
+    }
+
+
+
+

@@ -17,9 +17,13 @@ public class Interface extends JFrame {
     private Shortcut shortcut;
     public Build build;
     private JDialog jHelpDialog;
+    private String ajuda = "ATALHOS:\n" +
+            "CTRL+S: SALVAR\n" +
+            "CTRL+SHIFT+A: ABRIR ARQUIVO\n" +
+            "CTRL+N: NOVO ARQUIVO";
     public Interface(Build build) {
         this.build = build;
-        fileManager = new FileManager();
+        fileManager = new FileManager(this);
         textOutput = new TextOutput();
         textInput = new TextInput(this);
         toolBar = new ToolBar(this);
@@ -62,7 +66,7 @@ public class Interface extends JFrame {
     }
 
     private int checkExit(){
-        if(fileManager.saveInSecondChance(this)){
+        if(!fileManager.saveInSecondChance()){
             return EXIT_ON_CLOSE;
         }
         return DO_NOTHING_ON_CLOSE;
@@ -94,7 +98,7 @@ public class Interface extends JFrame {
         jHelpDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         jHelpDialog.setMinimumSize(new Dimension(W,H));
         jHelpDialog.setResizable(false);
-        JLabel jHelpLabel = new JLabel("Me ajuda pelo amor de deus");
+        JLabel jHelpLabel = new JLabel(ajuda);
         jHelpLabel.setVisible(true);
         jHelpDialog.add(jHelpLabel, BorderLayout.PAGE_START);
         jHelpDialog.setVisible(true);

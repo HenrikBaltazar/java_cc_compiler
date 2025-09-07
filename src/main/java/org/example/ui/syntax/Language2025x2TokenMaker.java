@@ -62,7 +62,7 @@ public class Language2025x2TokenMaker extends AbstractTokenMaker {
             }
         }
 
-        addNullToken(); // 🔹 obrigatório
+        addNullToken();
         return firstToken;
     }
 

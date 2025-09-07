@@ -7,13 +7,13 @@ public class Shortcut {
 
     public void Detect(Interface parent, KeyEvent e){
         if(saveFile(e)){
-            parent.getToolBar().saveFile(parent);
+            parent.getToolBar().saveFile();
         }
         if(newFile(e)){
-            parent.getToolBar().newFile(parent);
+            parent.getToolBar().newFile();
         }
         if(openFile(e)){
-            parent.getToolBar().openFile(parent);
+            parent.getToolBar().openFile();
         }
     }
 

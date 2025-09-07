@@ -19,10 +19,12 @@ public class ToolBar extends JToolBar{
     private static final ImageIcon ICON_BUILD = new ImageIcon(resourcesPath+"icon_build.png");
     private static final ImageIcon ICON_RUN = new ImageIcon(resourcesPath+"icon_run.png");
     private static final ImageIcon ICON_HELP = new ImageIcon(resourcesPath+"icon_help.png");
-    private JButton jButtonNewFile,jButtonOpenFile,jButtonSaveFile,jButtonCutText,jButtonCopyText,jButtonPasteText,jButtonBuildCode,jButtonRunCode,jButtonHelp;
+    private static final ImageIcon ICON_CLEAR = new ImageIcon(resourcesPath+"icon_clear.png");
+    private JButton jButtonNewFile,jButtonOpenFile,jButtonSaveFile,jButtonCutText,jButtonCopyText,jButtonPasteText,jButtonBuildCode,jButtonRunCode,jButtonClear, jButtonHelp;
+    private Interface parent;
     public ToolBar(Interface parent) {
         setName("ToolBar");
-
+        this.parent = parent;
         jButtonNewFile = new JButton(ICON_NEW);
         jButtonNewFile.setToolTipText("Novo arquivo (CTRL+N)");
 
@@ -47,61 +49,70 @@ public class ToolBar extends JToolBar{
         jButtonRunCode = new JButton(ICON_RUN);
         jButtonRunCode.setToolTipText("Executar");
 
+        jButtonClear = new JButton(ICON_CLEAR);
+        jButtonClear.setToolTipText("Limpar saída");
+
         jButtonHelp = new JButton(ICON_HELP);
         jButtonHelp.setToolTipText("Ajuda");
 
 
         jButtonNewFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                newFile(parent);
+                newFile();
             }
         });
 
         jButtonOpenFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                openFile(parent);
+                openFile();
             }
         });
 
         jButtonSaveFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveFile(parent);
+                saveFile();
             }
         });
 
         jButtonCutText.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                cutText(parent);
+                cutText();
             }
         });
 
         jButtonCopyText.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                copyText(parent);
+                copyText();
             }
         });
 
         jButtonPasteText.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                pasteText(parent);
+                pasteText();
             }
         });
 
         jButtonBuildCode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                buildCode(parent);
+                buildCode();
             }
         });
 
         jButtonRunCode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                runCode(parent);
+                runCode();
+            }
+        });
+
+        jButtonClear.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                parent.getTextOutput().setText("");
             }
         });
 
         jButtonHelp.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                help(parent);
+                help();
             }
         });
 
@@ -116,6 +127,7 @@ public class ToolBar extends JToolBar{
         addSeparator();
         add(jButtonBuildCode);
         add(jButtonRunCode);
+        add(jButtonClear);
         addSeparator();
         add(jButtonHelp);
 
@@ -138,9 +150,9 @@ public class ToolBar extends JToolBar{
         });
     }
 
-    public void newFile(Interface parent) {
-        parent.getFileManager().saveInSecondChance(parent);
-        parent.getFileManager().setFileSaved(true,parent);
+    public void newFile() {
+        parent.getFileManager().saveInSecondChance();
+        parent.getFileManager().setFileSaved(true);
         parent.getFileManager().setFilePath(null);
         parent.getTextInput().setInputText("");
         parent.getTextInput().setRow(0);
@@ -148,8 +160,8 @@ public class ToolBar extends JToolBar{
         parent.setWindowTitle("Compilador");
     }
 
-    public void openFile(Interface parent) {
-        File selectedFile = parent.getFileManager().openFileChooser(this,parent);
+    public void openFile() {
+        File selectedFile = parent.getFileManager().openFileChooser();
         String text = "";
         if (selectedFile != null) {
             try {
@@ -163,32 +175,36 @@ public class ToolBar extends JToolBar{
     }
 
 
-    public void saveFile(Interface parent) {
-        int file = parent.getFileManager().saveFile(parent);
+    public void saveFile() {
+        int file = parent.getFileManager().saveFile();
     }
 
-    public void cutText(Interface parent) {
+    public void cutText() {
         parent.getTextInput().getTextArea().cut();
     }
 
-    public void copyText(Interface parent) {
+    public void copyText() {
         parent.getTextInput().getTextArea().copy();
     }
 
-    public void pasteText(Interface parent) {
+    public void pasteText() {
         parent.getTextInput().getTextArea().paste();
     }
 
-    public void buildCode(Interface parent){
+    public void buildCode(){
+        if(parent.getFileManager().saveInSecondChance()){
+            parent.build.buildCode();
+        }else{
+            JOptionPane.showMessageDialog(parent, "Utilize o botão 'executar' para compilar sem salvar");
+        }
+
+    }
+
+    public void runCode(){
         parent.build.buildCode();
-        JOptionPane.showMessageDialog(parent, "Build");
     }
 
-    public void runCode(Interface parent){
-        JOptionPane.showMessageDialog(parent, "build");
-    }
-
-    public void help(Interface parent) {
+    public void help() {
         parent.openHelpWindow();
     }
 

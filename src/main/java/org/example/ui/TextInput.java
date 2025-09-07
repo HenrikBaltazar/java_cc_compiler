@@ -22,7 +22,7 @@ public class TextInput extends JPanel {
         atmf.putMapping("text/language2025x2",
                 "org.example.ui.syntax.Language2025x2TokenMaker");
 
-        textArea.setSyntaxEditingStyle("text/language2025x2");
+       // textArea.setSyntaxEditingStyle("text/language2025x2");
         SyntaxScheme scheme = textArea.getSyntaxScheme();
         scheme.getStyle(Token.RESERVED_WORD).foreground = Color.BLUE;
         scheme.getStyle(Token.IDENTIFIER).foreground = Color.BLACK;
@@ -41,7 +41,7 @@ public class TextInput extends JPanel {
             @Override
             public void keyTyped(KeyEvent e) {
                 if(parent.getFileManager().isFileSaved()){
-                    parent.getFileManager().setFileSaved(false,parent);
+                    parent.getFileManager().setFileSaved(false);
                 }
             }
 
