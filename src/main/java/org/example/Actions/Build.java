@@ -41,6 +41,10 @@ public class Build {
             return "ERRO LÉXICO: símbolo inválido";
         } else if (category.equals("<ERROR_UNTERMINATED_STRING>")) {
            return "ERRO LÉXICO: constante literal não finalizada";
+        } else if (category.equals("<ERROR_IDENTIFIER_START_WITH_NUM>")) {
+            return "ERRO LÉXICO: identificador inicia com numero";
+        } else if (category.equals("<ERROR_UNTERMINATED_COMMENT>")) {
+            return "ERRO LÉXICO: comentario de bloco não finalizado";
         }else if (category.equals("<TEXT>")) {
             return "CONSTANTE DE TEXTO";
         }

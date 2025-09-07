@@ -113,9 +113,13 @@ public interface Language2025x2Constants {
   /** RegularExpression Id. */
   int IDENTIFIER = 55;
   /** RegularExpression Id. */
-  int ERROR_UNTERMINATED_STRING = 56;
+  int ERROR_IDENTIFIER_START_WITH_NUM = 56;
   /** RegularExpression Id. */
-  int INVALID_SYMBOL = 57;
+  int ERROR_UNTERMINATED_STRING = 57;
+  /** RegularExpression Id. */
+  int ERROR_UNTERMINATED_COMMENT = 58;
+  /** RegularExpression Id. */
+  int INVALID_SYMBOL = 59;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -178,7 +182,9 @@ public interface Language2025x2Constants {
     "\"|\"",
     "\"&\"",
     "<IDENTIFIER>",
+    "<ERROR_IDENTIFIER_START_WITH_NUM>",
     "<ERROR_UNTERMINATED_STRING>",
+    "<ERROR_UNTERMINATED_COMMENT>",
     "<INVALID_SYMBOL>",
   };
 

@@ -73,8 +73,10 @@ TOKEN : {
     | <PIPE: "|">
     | <AMPERSAND: "&">
 
-    | <IDENTIFIER: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
+    | <IDENTIFIER: ["a"-"z", "A"-"Z", "_"] ( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
+    | <ERROR_IDENTIFIER_START_WITH_NUM: ["0"-"9"]( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
     | <ERROR_UNTERMINATED_STRING: "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* ("\n" | "\r" | "\r\n") >
+    | <ERROR_UNTERMINATED_COMMENT: "/*" (~[])* >
     | <INVALID_SYMBOL: ~[]>
 
 }
