@@ -9,6 +9,11 @@ public class Language2025x2 {}
 
 PARSER_END(Language2025x2)
 
+SPECIAL_TOKEN :{
+    <SINGLE_LINE_COMMENT: "#" (~["\n","\r"])*>
+    | < BLOCK_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" >
+}
+
 SKIP: {
       " "
     | "\n"
@@ -71,14 +76,5 @@ TOKEN : {
     | <IDENTIFIER: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9", "_"] )* >
     | <ERROR_UNTERMINATED_STRING: "\"" ( "\\" ~[] | ~["\"", "\\", "\n", "\r"] )* ("\n" | "\r" | "\r\n") >
     | <INVALID_SYMBOL: ~[]>
+
 }
-
-    SPECIAL_TOKEN :
-    {
-      <SINGLE_LINE_COMMENT: "#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
-      | < BLOCK_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" >
-    }
-
-
-
-

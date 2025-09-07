@@ -11,111 +11,111 @@ public interface Language2025x2Constants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int BEGIN = 5;
+  int SINGLE_LINE_COMMENT = 1;
   /** RegularExpression Id. */
-  int DEFINE = 6;
+  int BLOCK_COMMENT = 2;
   /** RegularExpression Id. */
-  int START = 7;
+  int BEGIN = 7;
   /** RegularExpression Id. */
-  int END = 8;
+  int DEFINE = 8;
   /** RegularExpression Id. */
-  int SET = 9;
+  int START = 9;
   /** RegularExpression Id. */
-  int TYPE_NUM = 10;
+  int END = 10;
   /** RegularExpression Id. */
-  int TYPE_REAL = 11;
+  int SET = 11;
   /** RegularExpression Id. */
-  int TYPE_TEXT = 12;
+  int TYPE_NUM = 12;
   /** RegularExpression Id. */
-  int TYPE_FLAG = 13;
+  int TYPE_REAL = 13;
   /** RegularExpression Id. */
-  int READ = 14;
+  int TYPE_TEXT = 14;
   /** RegularExpression Id. */
-  int SHOW = 15;
+  int TYPE_FLAG = 15;
   /** RegularExpression Id. */
-  int IF = 16;
+  int READ = 16;
   /** RegularExpression Id. */
-  int THEN = 17;
+  int SHOW = 17;
   /** RegularExpression Id. */
-  int ELSE = 18;
+  int IF = 18;
   /** RegularExpression Id. */
-  int TRUE = 19;
+  int THEN = 19;
   /** RegularExpression Id. */
-  int FALSE = 20;
+  int ELSE = 20;
   /** RegularExpression Id. */
-  int LOOP = 21;
+  int TRUE = 21;
   /** RegularExpression Id. */
-  int WHILE = 22;
+  int FALSE = 22;
   /** RegularExpression Id. */
-  int TEXT = 23;
+  int LOOP = 23;
   /** RegularExpression Id. */
-  int REAL = 24;
+  int WHILE = 24;
   /** RegularExpression Id. */
-  int NUM = 25;
+  int TEXT = 25;
   /** RegularExpression Id. */
-  int EQUAL = 26;
+  int REAL = 26;
   /** RegularExpression Id. */
-  int NOT_EQUAL = 27;
+  int NUM = 27;
   /** RegularExpression Id. */
-  int SEMICOLON = 28;
+  int EQUAL = 28;
   /** RegularExpression Id. */
-  int ASSIGN = 29;
+  int NOT_EQUAL = 29;
   /** RegularExpression Id. */
-  int COLON = 30;
+  int SEMICOLON = 30;
   /** RegularExpression Id. */
-  int COMMA = 31;
+  int ASSIGN = 31;
   /** RegularExpression Id. */
-  int DOT = 32;
+  int COLON = 32;
   /** RegularExpression Id. */
-  int LBRACE = 33;
+  int COMMA = 33;
   /** RegularExpression Id. */
-  int RBRACE = 34;
+  int DOT = 34;
   /** RegularExpression Id. */
-  int LBRACKET = 35;
+  int LBRACE = 35;
   /** RegularExpression Id. */
-  int RBRACKET = 36;
+  int RBRACE = 36;
   /** RegularExpression Id. */
-  int LPAREN = 37;
+  int LBRACKET = 37;
   /** RegularExpression Id. */
-  int RPAREN = 38;
+  int RBRACKET = 38;
   /** RegularExpression Id. */
-  int PLUS = 39;
+  int LPAREN = 39;
   /** RegularExpression Id. */
-  int MINUS = 40;
+  int RPAREN = 40;
   /** RegularExpression Id. */
-  int SHIFT_RIGHT_ASSIGN = 41;
+  int PLUS = 41;
   /** RegularExpression Id. */
-  int STAR = 42;
+  int MINUS = 42;
   /** RegularExpression Id. */
-  int SLASH = 43;
+  int SHIFT_RIGHT_ASSIGN = 43;
   /** RegularExpression Id. */
-  int PERCENT = 44;
+  int STAR = 44;
   /** RegularExpression Id. */
-  int POWER = 45;
+  int SLASH = 45;
   /** RegularExpression Id. */
-  int DOUBLE_PERCENT = 46;
+  int PERCENT = 46;
   /** RegularExpression Id. */
-  int SHIFT_LEFT = 47;
+  int POWER = 47;
   /** RegularExpression Id. */
-  int SHIFT_RIGHT = 48;
+  int DOUBLE_PERCENT = 48;
   /** RegularExpression Id. */
-  int SHIFT_LEFT_ASSIGN = 49;
+  int SHIFT_LEFT = 49;
   /** RegularExpression Id. */
-  int EXCLAMATION = 50;
+  int SHIFT_RIGHT = 50;
   /** RegularExpression Id. */
-  int PIPE = 51;
+  int SHIFT_LEFT_ASSIGN = 51;
   /** RegularExpression Id. */
-  int AMPERSAND = 52;
+  int EXCLAMATION = 52;
   /** RegularExpression Id. */
-  int IDENTIFIER = 53;
+  int PIPE = 53;
   /** RegularExpression Id. */
-  int ERROR_UNTERMINATED_STRING = 54;
+  int AMPERSAND = 54;
   /** RegularExpression Id. */
-  int INVALID_SYMBOL = 55;
+  int IDENTIFIER = 55;
   /** RegularExpression Id. */
-  int SINGLE_LINE_COMMENT = 56;
+  int ERROR_UNTERMINATED_STRING = 56;
   /** RegularExpression Id. */
-  int BLOCK_COMMENT = 57;
+  int INVALID_SYMBOL = 57;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -123,6 +123,8 @@ public interface Language2025x2Constants {
   /** Literal token values. */
   String[] tokenImage = {
     "<EOF>",
+    "<SINGLE_LINE_COMMENT>",
+    "<BLOCK_COMMENT>",
     "\" \"",
     "\"\\n\"",
     "\"\\r\"",
@@ -178,8 +180,6 @@ public interface Language2025x2Constants {
     "<IDENTIFIER>",
     "<ERROR_UNTERMINATED_STRING>",
     "<INVALID_SYMBOL>",
-    "<SINGLE_LINE_COMMENT>",
-    "<BLOCK_COMMENT>",
   };
 
 }
