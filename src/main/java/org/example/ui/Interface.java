@@ -38,8 +38,7 @@ public class Interface extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                int action = checkExit();
-                if (action == EXIT_ON_CLOSE) {
+                if (maybeCloseApp()) {
                     dispose();
                 }
             }
@@ -49,9 +48,9 @@ public class Interface extends JFrame {
                 JSplitPane.VERTICAL_SPLIT,
                 textInput, textOutput
         );
-        splitPane.setDividerLocation(950);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setResizeWeight(0.5);
+        splitPane.setResizeWeight(0.70);
+        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.72));
 
         setJMenuBar(new WindowBar(this));
         getContentPane().add(toolBar, BorderLayout.PAGE_START);
@@ -105,6 +104,13 @@ public class Interface extends JFrame {
         jHelpLabel.setVisible(true);
         jHelpDialog.add(jHelpLabel, BorderLayout.PAGE_START);
         jHelpDialog.setVisible(true);
+    }
+
+    private boolean maybeCloseApp() {
+        // deve perguntar salvar somente se estiver sujo
+        // FileManager.saveInSecondChance() -> true: usuário escolheu SALVAR ou NÃO SALVAR (pode sair)
+        // false: usuário CANCELAR (não sair)
+        return fileManager.saveInSecondChance();
     }
 
 }

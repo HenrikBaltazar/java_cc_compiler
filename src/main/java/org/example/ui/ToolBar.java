@@ -8,6 +8,9 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 
 public class ToolBar extends JToolBar {
 
@@ -38,7 +41,7 @@ public class ToolBar extends JToolBar {
         jButtonCopyText.addActionListener(e -> parent.getTextInput().getTextArea().copy());
         jButtonPasteText.addActionListener(e -> parent.getTextInput().getTextArea().paste());
         jButtonRunCode.addActionListener(e -> parent.build.buildCode());
-        jButtonClear.addActionListener(e -> parent.getTextOutput().setText(""));
+        jButtonClear.addActionListener(e -> clearAll());
         jButtonHelp.addActionListener(e -> parent.openHelpWindow());
 
         add(jButtonNewFile);
@@ -65,16 +68,35 @@ public class ToolBar extends JToolBar {
             @Override
             public void keyReleased(KeyEvent e) {}
         });
+
+        // Habilita/Desabilita "Compilar" conforme o editor está vazio ou não
+        updateCompileEnabled(); // estado inicial
+        parent.getTextInput().getTextArea().getDocument().addDocumentListener(new DocumentListener() {
+            private void changed() { updateCompileEnabled(); }
+            @Override public void insertUpdate(DocumentEvent e) { changed(); }
+            @Override public void removeUpdate(DocumentEvent e) { changed(); }
+            @Override public void changedUpdate(DocumentEvent e) { changed(); }
+        });
+
     }
 
     public void newFile() {
-        parent.getFileManager().saveInSecondChance();
-        parent.getFileManager().setFileSaved(true);
-        parent.getFileManager().setFilePath(null);
+        // Pergunta salvar apenas se houver alterações pendentes
+        if (!parent.getFileManager().saveInSecondChance()) return; // Cancelar -> não faz nada
+
+        // Limpa editor (em cima)
         parent.getTextInput().setInputText("");
         parent.getTextInput().setRow(0);
         parent.getTextInput().setCol(0);
-        parent.setWindowTitle("Compilador");
+
+        // Limpa mensagens (embaixo)
+        parent.getTextOutput().setText("");
+
+        // Esquecer arquivo atual e marcar estado novo/limpo
+        parent.getFileManager().resetAsNewCleanBuffer();
+
+        // Foco no editor
+        parent.getTextInput().getTextArea().requestFocusInWindow();
     }
 
     public void openFile() {
@@ -120,4 +142,37 @@ public class ToolBar extends JToolBar {
         button.setToolTipText(toolTipText);
         return button;
     }
+
+    public void clearAll() {
+        String currentText = parent.getTextInput().getTextArea().getText();
+
+        if (currentText == null || currentText.isBlank()) {
+            parent.getTextOutput().setText("");
+            parent.getTextInput().setInputText("");
+            parent.getTextInput().setRow(0);
+            parent.getTextInput().setCol(0);
+            parent.getFileManager().resetAsNewCleanBuffer();
+            return;
+        }
+
+        if (!parent.getFileManager().saveInSecondChance()) {
+            return;
+        }
+
+        parent.getTextInput().setInputText("");
+        parent.getTextInput().setRow(0);
+        parent.getTextInput().setCol(0);
+        parent.getTextOutput().setText("");
+
+        parent.getFileManager().resetAsNewCleanBuffer();
+
+        parent.getTextInput().getTextArea().requestFocusInWindow();
+    }
+
+    private void updateCompileEnabled() {
+        boolean enabled = !parent.getTextInput().getTextArea().getText().isBlank();
+        jButtonBuildCode.setEnabled(enabled);
+    }
+
+
 }

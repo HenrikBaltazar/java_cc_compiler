@@ -3,6 +3,7 @@ package org.example.Actions;
 import org.example.ui.Interface;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,20 +15,26 @@ public class FileManager {
     private boolean isFileSaved = true;
     private Interface parent;
     private boolean isFileOpened = false;
+    private File lastDir = new File("resources");
+
     public FileManager(Interface parent) {
         this.parent = parent;
     }
     public File openFileChooser() {
         if(saveInSecondChance()){
-            JFileChooser fileChooser = new JFileChooser(new java.io.File("resources"));
+            JFileChooser fileChooser = new JFileChooser(lastDir);
             fileChooser.setPreferredSize(new Dimension(800, 600));
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setDialogTitle("Selecione o Programa");
             fileChooser.setApproveButtonText("Abrir");
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto (*.txt)", "txt"));
 
             int returnValue = fileChooser.showOpenDialog(parent);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
+
+                lastDir = fileChooser.getCurrentDirectory(); // atualiza pasta corrente
                 if (selectedFile.getPath().endsWith(".txt")) {
                     this.filePath = selectedFile.toPath();
                     this.isFileSaved = true;
@@ -48,24 +55,38 @@ public class FileManager {
 
     public int saveFile() {
         if(!isFileOpened){
-            JFileChooser fileChooser = new JFileChooser(new java.io.File("resources"));
+            JFileChooser fileChooser = new JFileChooser(lastDir);
             fileChooser.setPreferredSize(new Dimension(800, 600));
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setDialogTitle("Selecione o diretorio para salvar");
             fileChooser.setApproveButtonText("Salvar");
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto (*.txt)", "txt")); // <<<
 
             int returnValue = fileChooser.showOpenDialog(parent);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedDir = fileChooser.getSelectedFile();
-                if(!selectedDir.getName().toLowerCase().endsWith(".txt")){
-                    selectedDir = new File(selectedDir.getAbsolutePath()+".txt");
+                File selectedFile = fileChooser.getSelectedFile();
+                lastDir = fileChooser.getCurrentDirectory();
+
+                if (!selectedFile.getName().toLowerCase().endsWith(".txt")) {
+                    selectedFile = new File(selectedFile.getParent(), selectedFile.getName() + ".txt");
                 }
-                try(FileWriter fw = new FileWriter(selectedDir)) {
+
+                if (selectedFile.exists()) {
+                    int over = JOptionPane.showConfirmDialog(parent,
+                            "O arquivo já existe. Deseja sobrescrever?",
+                            "Confirmar sobrescrita",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                    if (over != JOptionPane.YES_OPTION) return 0;
+                }
+
+                try(FileWriter fw = new FileWriter(selectedFile)) {
                     fw.write(parent.getTextInput().getText());
-                    parent.setWindowTitle("Compilador"+" - "+selectedDir.getName());
-                    JOptionPane.showMessageDialog(parent,"Arquivo salvo em "+selectedDir.getAbsolutePath()+" com sucesso!");
+                    parent.setWindowTitle("Compilador"+" - "+selectedFile.getName());
+                    JOptionPane.showMessageDialog(parent,"Arquivo salvo em "+selectedFile.getAbsolutePath()+" com sucesso!");
                     this.isFileSaved = true;
-                    this.filePath = selectedDir.toPath();
+                    this.filePath = selectedFile.toPath();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -78,6 +99,9 @@ public class FileManager {
                 parent.setWindowTitle("Compilador"+" - "+filePath.toFile().getName());
                 JOptionPane.showMessageDialog(parent,"Arquivo salvo em "+filePath.toFile().getAbsolutePath()+" com sucesso!");
                 this.isFileSaved = true;
+                lastDir = filePath.toFile().getParentFile();//  atualiza pasta corrente para a do arquivo
+
+
                 this.filePath = filePath.toFile().toPath();
             }catch (Exception e){
                 e.printStackTrace();
@@ -95,18 +119,20 @@ public class FileManager {
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
             );
-            if (option == JOptionPane.YES_OPTION){
-                int file = saveFile();
-                if( file != 1){
-                    saveInSecondChance();
-                }
-                return true;
-            }else{
-                return false;
+
+            if (option == JOptionPane.CANCEL_OPTION || option == JOptionPane.CLOSED_OPTION) {
+                return false;           // não prossegue
             }
+            if (option == JOptionPane.NO_OPTION) {
+                return true;            // prossegue SEM salvar (regra do enunciado)
+            }
+            // YES_OPTION -> tenta salvar
+            int file = saveFile();
+            return (file == 1) || isFileOpened;
         }
-        return true;
+        return true; // já está salvo -> pode prosseguir
     }
+
 
     public Path getFilePath() {
         return filePath;
@@ -129,6 +155,15 @@ public class FileManager {
         if (!isFileSaved && !parent.getWindowTitle().endsWith("*")) {
             parent.setWindowTitle(parent.getWindowTitle()+"*");
         }
+    }
+
+    // Reseta o estado como se fosse um buffer novo e limpo (sem arquivo associado)
+    public void resetAsNewCleanBuffer() {
+        this.filePath = null;          // sem arquivo vinculado
+        this.isFileOpened = false;     // não há arquivo aberto
+        this.isFileSaved = true;       // estado "limpo" (não pedir para salvar)
+        // remove asterisco do título e volta ao título base
+        parent.setWindowTitle("Compilador");
     }
 
 }
