@@ -113,15 +113,27 @@ public interface Language2025x2Constants {
   /** RegularExpression Id. */
   int IDENTIFIER = 55;
   /** RegularExpression Id. */
-  int ERROR_IDENTIFIER_START_WITH_NUM = 56;
+  int ERROR_NUMBER_TOO_MANY_DIGITS = 56;
   /** RegularExpression Id. */
-  int ERROR_UNTERMINATED_STRING = 57;
+  int ERROR_IDENTIFIER_START_WITH_NUM = 57;
   /** RegularExpression Id. */
-  int ERROR_UNTERMINATED_COMMENT = 58;
+  int ERROR_IDENTIFIER_WITH_MANY_NUMS = 58;
   /** RegularExpression Id. */
-  int ERROR_INVALID_NUMBER = 59;
+  int ERROR_IDENTIFIER_ENDS_WITH_NUM = 59;
   /** RegularExpression Id. */
-  int ERROR_INVALID_SYMBOL = 60;
+  int ERROR_UNTERMINATED_STRING = 60;
+  /** RegularExpression Id. */
+  int ERROR_UNTERMINATED_COMMENT = 61;
+  /** RegularExpression Id. */
+  int ERROR_REAL_TOO_MANY_DIGITS1 = 62;
+  /** RegularExpression Id. */
+  int ERROR_REAL_TOO_MANY_DIGITS2 = 63;
+  /** RegularExpression Id. */
+  int ERROR_REAL_TOO_MANY_DIGITS3 = 64;
+  /** RegularExpression Id. */
+  int ERROR_INVALID_REAL = 65;
+  /** RegularExpression Id. */
+  int ERROR_INVALID_SYMBOL = 66;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -184,10 +196,16 @@ public interface Language2025x2Constants {
     "\"|\"",
     "\"&\"",
     "<IDENTIFIER>",
+    "<ERROR_NUMBER_TOO_MANY_DIGITS>",
     "<ERROR_IDENTIFIER_START_WITH_NUM>",
+    "<ERROR_IDENTIFIER_WITH_MANY_NUMS>",
+    "<ERROR_IDENTIFIER_ENDS_WITH_NUM>",
     "<ERROR_UNTERMINATED_STRING>",
     "<ERROR_UNTERMINATED_COMMENT>",
-    "<ERROR_INVALID_NUMBER>",
+    "<ERROR_REAL_TOO_MANY_DIGITS1>",
+    "<ERROR_REAL_TOO_MANY_DIGITS2>",
+    "<ERROR_REAL_TOO_MANY_DIGITS3>",
+    "<ERROR_INVALID_REAL>",
     "<ERROR_INVALID_SYMBOL>",
   };
 

@@ -46,9 +46,17 @@ public class Build {
         } else if (category.equals("<ERROR_UNTERMINATED_COMMENT>")) {
             return "ERRO LÉXICO: comentario de bloco não finalizado";
         }else if (category.equals("<TEXT>")) {
-            return "CONSTANTE DE TEXTO";
-        }else if (category.equals("<ERROR_INVALID_NUMBER>")) {
-            return "ERRO LÉXICO: constante numérica inválida";
+            return "CONSTANTE LITERAL";
+        }else if (category.equals("<ERROR_REAL_TOO_MANY_DIGITS>") || category.equals("<ERROR_REAL_TOO_MANY_DIGITS2>") || category.equals("<ERROR_REAL_TOO_MANY_DIGITS3>")) {
+            return "ERRO LÉXICO: constante real com muitas casas";
+        }else if (category.equals("<ERROR_INVALID_REAL>")) {
+            return "ERRO LÉXICO: constante real inválida";
+        }else if (category.equals("<ERROR_NUMBER_TOO_MANY_DIGITS>")) {
+            return "ERRO LÉXICO: constante numérica com muitas casas";
+        }else if (category.equals("<ERROR_IDENTIFIER_WITH_MANY_NUMS>")) {
+            return "ERRO LÉXICO: identificador com muitos números consecutivos";
+        }else if (category.equals("<ERROR_IDENTIFIER_ENDS_WITH_NUM>")) {
+            return "ERRO LÉXICO: identificador termina com número";
         }
         return category;
     }

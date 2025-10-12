@@ -84,18 +84,14 @@ public class ToolBar extends JToolBar {
         // Pergunta salvar apenas se houver alterações pendentes
         if (!parent.getFileManager().saveInSecondChance()) return; // Cancelar -> não faz nada
 
-        // Limpa editor (em cima)
         parent.getTextInput().setInputText("");
         parent.getTextInput().setRow(0);
         parent.getTextInput().setCol(0);
 
-        // Limpa mensagens (embaixo)
         parent.getTextOutput().setText("");
 
-        // Esquecer arquivo atual e marcar estado novo/limpo
         parent.getFileManager().resetAsNewCleanBuffer();
 
-        // Foco no editor
         parent.getTextInput().getTextArea().requestFocusInWindow();
     }
 
@@ -105,6 +101,10 @@ public class ToolBar extends JToolBar {
             try {
                 String text = Files.readString(selectedFile.toPath());
                 parent.getTextInput().setInputText(text);
+                parent.getTextOutput().setText("");
+                parent.getTextInput().setRow(0);
+                parent.getTextInput().setCol(0);
+                parent.getTextInput().getTextArea().requestFocusInWindow();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(parent, "Erro ao abrir arquivo: " + e.getMessage(), "Erro de Leitura", JOptionPane.ERROR_MESSAGE);
             }
@@ -144,34 +144,13 @@ public class ToolBar extends JToolBar {
     }
 
     public void clearAll() {
-        String currentText = parent.getTextInput().getTextArea().getText();
-
-        if (currentText == null || currentText.isBlank()) {
-            parent.getTextOutput().setText("");
-            parent.getTextInput().setInputText("");
-            parent.getTextInput().setRow(0);
-            parent.getTextInput().setCol(0);
-            parent.getFileManager().resetAsNewCleanBuffer();
-            return;
-        }
-
-        if (!parent.getFileManager().saveInSecondChance()) {
-            return;
-        }
-
-        parent.getTextInput().setInputText("");
-        parent.getTextInput().setRow(0);
-        parent.getTextInput().setCol(0);
         parent.getTextOutput().setText("");
-
-        parent.getFileManager().resetAsNewCleanBuffer();
-
-        parent.getTextInput().getTextArea().requestFocusInWindow();
     }
 
     private void updateCompileEnabled() {
         boolean enabled = !parent.getTextInput().getTextArea().getText().isBlank();
         jButtonBuildCode.setEnabled(enabled);
+        jButtonRunCode.setEnabled(enabled);
     }
 
 
