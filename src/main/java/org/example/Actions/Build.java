@@ -16,8 +16,8 @@ public class Build {
     Interface parent;
     StringBuilder outputLog = new StringBuilder();
     DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    private List<String> RESERVED_WORDS = List.of("begin","define","start","end","set","num","real","text","flag","read","show","if","then","else","true","false");
-    private List<String> SPECIAL_SYMBOLS = List.of("==", "!=", ";", "=", ":", ",", ".", "{", "}", "[", "]", "(", ")", "+", "-", ">>=", "*", "/", "%", "**", "%%", "<<", ">>","<<=", "!", "|" ,"&");
+    private static final List<String> RESERVED_WORDS = List.of("begin","define","start","end","set","num","real","text","flag","read","show","if","then","else","true","false");
+    private static final List<String> SPECIAL_SYMBOLS = List.of("==", "!=", ";", "=", ":", ",", ".", "{", "}", "[", "]", "(", ")", "+", "-", ">>=", "*", "/", "%", "**", "%%", "<<", ">>","<<=", "!", "|" ,"&");
     List<Token> specialTokensList;
     public Build() {
     }
@@ -95,6 +95,7 @@ public class Build {
             }
 
             outputLog.append("\n--- Análise Léxica Concluída com Sucesso ---\n");
+            outputLog.append(Language2025x2.run(Reader.of(sourceCode)));
             printSpecialTokens();
         } catch (TokenMgrError e) {
             outputLog.append("\n--- ERRO LÉXICO INESPERADO ---\n");
@@ -103,7 +104,6 @@ public class Build {
             outputLog.append("\n--- ERRO INTERNO INESPERADO ---\n");
             outputLog.append(e.toString());
         }
-
         parent.getTextOutput().setText(outputLog.toString());
         outputLog.setLength(0);
     }

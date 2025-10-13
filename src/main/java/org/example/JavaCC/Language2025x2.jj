@@ -1,11 +1,38 @@
 options {
     IGNORE_CASE = true;
     STATIC = false;
+    DEBUG_LOOKAHEAD = true;
 }
 
 PARSER_BEGIN(Language2025x2)
 package org.example.JavaCC;
-public class Language2025x2 {}
+public class Language2025x2 {
+    public StringBuilder errosSintaticos = new StringBuilder();
+
+    public String criaListaEsperados(int[][] sequenciaEsperada) {
+        StringBuilder tokensEsperados = new StringBuilder();
+        for (int[] sequencia : sequenciaEsperada) {
+            for (int token : sequencia) {
+                tokensEsperados.append(tokenImage[token]).append(" ");
+            }
+        }
+        return tokensEsperados.toString().trim();
+    }
+
+    public static String run(java.io.Reader lexico){
+        Language2025x2 parser = new Language2025x2(lexico);
+
+        try{
+            parser.program();
+        }
+        catch (ParseException e){
+            return "erro: "+e.getMessage();
+        }
+        return "ok";
+    }
+
+
+}
 
 PARSER_END(Language2025x2)
 
@@ -89,3 +116,20 @@ TOKEN : {
 
     | <ERROR_INVALID_SYMBOL: ~[]>
 }
+
+void program():{}
+{
+        try{
+            <BEGIN> [ <IDENTIFIER> ]
+            <START>
+            <END> <DOT>
+        }
+        catch(ParseException e){
+            String tokensEsperados = criaListaEsperados(e.expectedTokenSequences);
+            System.out.println("program: " + tokensEsperados);
+            System.out.println("=======================");
+            errosSintaticos.append("Linha ").append(e.currentToken.next.beginLine).append(", coluna ").append(e.currentToken.next.beginColumn).append("\n");
+
+        }
+}
+
