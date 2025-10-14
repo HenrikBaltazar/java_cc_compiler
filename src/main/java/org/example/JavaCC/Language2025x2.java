@@ -33,6 +33,27 @@ public class Language2025x2 implements Language2025x2Constants {
 
     }
 
+    void pulaAte(int... kinds) {
+        while (true) {
+            int k = getToken(1).kind; // olha o PRÓXIMO
+            if (k == 0) return;       // 0 = EOF
+            for (int g : kinds) if (k == g) return;
+            getNextToken();           // descarta lixo
+        }
+    }
+
+    /** Se o próximo token for um dos indicados, consome. */
+    void consomeSe(int... kinds) {
+        int k = getToken(1).kind;
+        for (int g : kinds) if (k == g) { getNextToken(); return; }
+    }
+
+    // Conjuntos de âncora (sugestão prática)
+    static final int[] SYNC_CMD_START = new int[]{SET, READ, SHOW, IF, LOOP}; // inícios de comando
+    static final int[] SYNC_CMD_STOP  = new int[]{SEMICOLON, END, ELSE, DOT}; // fim de comando/bloco
+    static final int[] SYNC_DECL      = new int[]{SEMICOLON, START};          // fim de decl / início do programa
+    static final int[] SYNC_EXPR      = new int[]{RPAREN, RBRACKET, COMMA, SEMICOLON, THEN, ELSE, END, DOT};
+
   final public void programa() throws ParseException {
     trace_call("programa");
     try {
@@ -63,6 +84,8 @@ public class Language2025x2 implements Language2025x2Constants {
         jj_consume_token(DOT);
       } catch (ParseException e) {
 reportaErro(e);
+            pulaAte(DOT, END, START);
+            consomeSe(DOT);
       }
     } finally {
       trace_return("programa");
@@ -79,6 +102,9 @@ reportaErro(e);
         listaDeclaracao();
       } catch (ParseException e) {
 reportaErro(e);
+         pulaAte(SYNC_DECL);
+         consomeSe(SEMICOLON); // se parou no ';', consome
+
       }
     } finally {
       trace_return("declaracao");
@@ -124,6 +150,8 @@ reportaErro(e);
         listaIdentificadores();
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_DECL);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("variosIdentificadores");
@@ -332,6 +360,10 @@ void listaDeComandos() throws ParseException {
         comando();
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(END, ELSE, DOT);
+        pulaAte(SEMICOLON, END, ELSE, DOT, SET, READ, SHOW, IF, LOOP);
+        consomeSe(SEMICOLON); // se havia ';', consome para não travar
+
       }
     } finally {
       trace_return("listaDeComandos");
@@ -384,6 +416,8 @@ reportaErro(e);
         }
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_CMD_STOP);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("comando");
@@ -403,6 +437,8 @@ reportaErro(e);
         jj_consume_token(SEMICOLON);
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_CMD_STOP);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("atribuicao");
@@ -422,6 +458,8 @@ reportaErro(e);
         jj_consume_token(SEMICOLON);
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_CMD_STOP);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("entrada");
@@ -440,6 +478,8 @@ reportaErro(e);
         jj_consume_token(SEMICOLON);
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_CMD_STOP);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("saida");
@@ -517,6 +557,8 @@ reportaErro(e);
         }
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_CMD_STOP); // pragmático
+
       }
     } finally {
       trace_return("listaIdOuConst");
@@ -541,6 +583,8 @@ reportaErro(e);
         }
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(RBRACKET, COMMA, RPAREN, SEMICOLON, END, ELSE, DOT);
+        consomeSe(RBRACKET);
       }
     } finally {
       trace_return("vetor");
@@ -556,6 +600,8 @@ reportaErro(e);
         expressao1();
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(SYNC_EXPR); // fecha em ) ] , ; then else end .
+
       }
     } finally {
       trace_return("expressao");
@@ -844,6 +890,8 @@ reportaErro(e);
         jj_consume_token(SEMICOLON);
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(END, SEMICOLON, ELSE, DOT);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("repeticao");
@@ -864,6 +912,8 @@ reportaErro(e);
         jj_consume_token(SEMICOLON);
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(ELSE, END, SEMICOLON, DOT);
+        consomeSe(SEMICOLON);
       }
     } finally {
       trace_return("selecao");
@@ -887,6 +937,7 @@ reportaErro(e);
         }
       } catch (ParseException e) {
 reportaErro(e);
+        pulaAte(END, SEMICOLON, DOT);
       }
     } finally {
       trace_return("ifelse");
@@ -1138,4 +1189,5 @@ reportaErro(e);
 	 }
   }
 
+                                                                                                             // fecha expr
 }

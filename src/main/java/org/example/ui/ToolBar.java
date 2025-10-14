@@ -40,7 +40,7 @@ public class ToolBar extends JToolBar {
         jButtonCutText.addActionListener(e -> parent.getTextInput().getTextArea().cut());
         jButtonCopyText.addActionListener(e -> parent.getTextInput().getTextArea().copy());
         jButtonPasteText.addActionListener(e -> parent.getTextInput().getTextArea().paste());
-        jButtonRunCode.addActionListener(e -> parent.build.buildCode());
+        jButtonRunCode.addActionListener(e -> runCode());
         jButtonClear.addActionListener(e -> clearAll());
         jButtonHelp.addActionListener(e -> parent.openHelpWindow());
 
@@ -117,6 +117,7 @@ public class ToolBar extends JToolBar {
 
     public void buildCode() {
         if (parent.getFileManager().saveInSecondChance()) {
+            clearAll();
             parent.build.buildCode();
         } else {
             JOptionPane.showMessageDialog(parent, "Utilize o botão 'executar' para compilar sem salvar");
@@ -145,6 +146,11 @@ public class ToolBar extends JToolBar {
 
     public void clearAll() {
         parent.getTextOutput().setText("");
+    }
+
+    public void runCode() {
+        clearAll();
+        parent.build.buildCode();
     }
 
     private void updateCompileEnabled() {

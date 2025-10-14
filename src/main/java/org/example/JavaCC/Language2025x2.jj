@@ -146,7 +146,7 @@ void declaracao():{}
         <DEFINE> listaDeclaracao()
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -166,7 +166,7 @@ void variosIdentificadores():{}
         <IDENTIFIER> listaIdentificadores()
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -233,7 +233,7 @@ void listaDeComandos() :{}
         comando()
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -244,7 +244,7 @@ void comando():{}
 
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -253,7 +253,7 @@ void atribuicao():{}{
         <SET> <IDENTIFIER> vetor() <ASSIGN> expressao() <SEMICOLON>
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -263,7 +263,7 @@ void entrada():{}
         <READ> <LPAREN> <IDENTIFIER> vetor() <RPAREN> <SEMICOLON>
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -273,7 +273,7 @@ void saida():{}
         <SHOW> <LPAREN> idOuConst() <RPAREN> <SEMICOLON>
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -293,7 +293,7 @@ void listaIdOuConst():{}
         [ <COMMA> ( <IDENTIFIER>vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -303,7 +303,7 @@ void vetor():{}
        [ <LBRACKET> expressao()<RBRACKET> ]
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -312,7 +312,7 @@ void expressao(): {}{
             expAritOuLogi() expressao1()
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -403,7 +403,7 @@ void repeticao(): {}
         <END> <SEMICOLON>
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -416,7 +416,7 @@ void selecao(): {}
         <END> <SEMICOLON>
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }
 
@@ -425,6 +425,6 @@ void ifelse(): {} {
         [ <ELSE> listaDeComandos() ]
     }catch(ParseException e){
         reportaErro(e);
-        
+
     }
 }

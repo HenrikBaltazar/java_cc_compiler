@@ -92,10 +92,10 @@ public class Build {
                         token.kind < 10 ? token.kind + " " : token.kind,
                         category
                 );
-                outputLog.append(tokenInfo);
+               // outputLog.append(tokenInfo);
             }
 
-            outputLog.append("\n--- Análise Léxica Concluída com Sucesso ---\n");
+            //outputLog.append("\n--- Análise Léxica Concluída com Sucesso ---\n");
 
         } catch (TokenMgrError e) {
             outputLog.append("\n--- ERRO LÉXICO ---\n");
