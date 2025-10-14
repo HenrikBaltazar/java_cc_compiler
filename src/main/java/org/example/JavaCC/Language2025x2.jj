@@ -6,41 +6,85 @@ options {
 
 PARSER_BEGIN(Language2025x2)
 package org.example.JavaCC;
-public class Language2025x2 {
-    public StringBuilder errosSintaticos = new StringBuilder();
 
-    private String criaListaEsperados(int[][] sequenciaEsperada) {
-        StringBuilder tokensEsperados = new StringBuilder();
-        for (int[] sequencia : sequenciaEsperada) {
-            for (int token : sequencia) {
-                tokensEsperados.append(tokenImage[token]).append(" ");
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.HashSet;
+
+public class Language2025x2 {
+
+    public StringBuilder errosSintaticos = new StringBuilder();
+    private Token ultimoErroReportado = null;
+    private boolean debug_recovery = true; // Mude para false para desativar as mensagens de debug
+
+    public static class RecoverySet extends HashSet<Integer> {
+        public RecoverySet(int... tokens) {
+            for (int token : tokens) {
+                this.add(token);
             }
         }
-        return tokensEsperados.toString().trim();
     }
 
-    void reportaErro(ParseException e) {
-        System.err.println("ERRO SINTÁTICO: " + e.getMessage());
-        Token t = e.currentToken.next; // O token que causou o erro
-        errosSintaticos.append("Erro na linha ")
-                      .append(t.beginLine)
-                      .append(", coluna ")
-                      .append(t.beginColumn)
-                      .append(". Encontrado '")
-                      .append(t.image)
-                      .append("'.\n");
+    static final RecoverySet declaracaoRecSet = new RecoverySet(SEMICOLON, START);
+    static final RecoverySet comandoRecSet = new RecoverySet(SEMICOLON, END, SET, READ, SHOW, IF, LOOP);
 
-        errosSintaticos.append("Encontrou: ")
-                        .append(t.image)
-                        .append(" Esperava: ")
-                        .append(criaListaEsperados(e.expectedTokenSequences))
-                        .append("\n");
+    private String criaListaEsperados(ParseException e) {
+        Set<String> tokensEsperados = new TreeSet<>();
+        for (int i = 0; i < e.expectedTokenSequences.length; i++) {
+            for (int j = 0; j < e.expectedTokenSequences[i].length; j++) {
+                String tokenImage = e.tokenImage[e.expectedTokenSequences[i][j]];
+                String tokenLimpo = tokenImage.replaceAll("^<|>$", "").replaceAll("\"", "");
+                tokensEsperados.add(tokenLimpo.toLowerCase());
+            }
+        }
+        return String.join(", ", tokensEsperados);
+    }
 
+    void reportaErro(ParseException e, String met) {
+        Token t = e.currentToken.next;
+        if (t == ultimoErroReportado) {
+            return;
+        }
+        ultimoErroReportado = t;
+
+        String encontrado = t.image;
+        String esperados = criaListaEsperados(e);
+        String erroMsg = String.format(
+            "Erro Sintático na linha %d, coluna %d (na regra '%s'): Encontrado '%s', mas esperava um de: [%s]\n",
+            t.beginLine, t.beginColumn, met, encontrado, esperados);
+        errosSintaticos.append(erroMsg);
+        System.err.print(erroMsg);
     }
 
 
+    void consumeUntil(RecoverySet g, ParseException e, String met) {
+        reportaErro(e, met); // Reporta o erro original
+
+        if (debug_recovery) {
+            System.out.println();
+            System.out.println("*** Recuperando do erro em '" + met + "' ***");
+            System.out.println("    Procurando por um token no conjunto: " + g);
+        }
+
+        Token tok = getToken(1); // Pega o token atual sem consumir
+
+        while (tok.kind != EOF) {
+            if (g.contains(tok.kind)) { // Achou um token de sincronização
+                if (debug_recovery) {
+                    System.out.println("    Encontrado token de sincronização: " + tokenImage[tok.kind]);
+                    System.out.println("*** Fim da Recuperação ***");
+                    System.out.println();
+                }
+                break; // Sai do laço, a recuperação terminou
+            }
+            if (debug_recovery) {
+                System.out.println("    Ignorando token: " + tokenImage[tok.kind]);
+            }
+            getNextToken();      // Consome o token atual
+            tok = getToken(1);   // Pega o próximo
+        }
+    }
 }
-
 PARSER_END(Language2025x2)
 
 SPECIAL_TOKEN :{
@@ -126,17 +170,12 @@ TOKEN : {
 
 void programa():{}
 {
-        try{
-            <BEGIN> [ <IDENTIFIER> ]
-            [ declaracao() ]
-            <START>
-            listaDeComandos()
-            <END> <DOT>
-        }
-        catch(ParseException e){
-            reportaErro(e);
-            
-        }
+    <BEGIN> [ <IDENTIFIER> ]
+    [ declaracao() ]
+    <START>
+    listaDeComandos()
+    <END> <DOT>
+
 }
 
 // DECLARACAO DE VARIAVEIS
@@ -145,19 +184,16 @@ void declaracao():{}
     try{
         <DEFINE> listaDeclaracao()
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "declaracao");
 
     }
 }
 
 void listaDeclaracao():{}
 {
-    try{
-        (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON>)+
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
+
+   (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON>)+
+
 }
 
 void variosIdentificadores():{}
@@ -165,7 +201,7 @@ void variosIdentificadores():{}
     try{
         <IDENTIFIER> listaIdentificadores()
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
 
     }
 }
@@ -190,7 +226,7 @@ void constantsDeclare():{}
     try{
         constants() constantsList()
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "declaracao");
         
     }
 }
@@ -200,7 +236,7 @@ void constantsList():{}
     try{
         [ <COMMA> constantsDeclare() ]
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "declaracao");
         
     }
 }
@@ -210,7 +246,7 @@ void variosTipos():{}
     try{
         [ <ASSIGN> constants() | <LBRACKET> <NUM> <RBRACKET> vectorDeclare() ]
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "declaracao");
         
     }
 
@@ -221,7 +257,7 @@ void vectorDeclare():{}
     try{
         [ <ASSIGN> <LBRACE> constantsDeclare() <RBRACE> ]
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(declaracaoRecSet, e, "declaracao");
         
     }
 }
@@ -232,7 +268,7 @@ void listaDeComandos() :{}
     try{
         comando()
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(comandoRecSet, e, "lista de comandos");
 
     }
 }
@@ -243,156 +279,91 @@ void comando():{}
       ( atribuicao() | entrada() | saida() | selecao() | repeticao() ) [ listaDeComandos() ]
 
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(comandoRecSet, e, "lista de comandos");
 
     }
 }
 
 void atribuicao():{}{
-    try{
         <SET> <IDENTIFIER> vetor() <ASSIGN> expressao() <SEMICOLON>
-    }catch(ParseException e){
-        reportaErro(e);
 
-    }
 }
 
 void entrada():{}
 {
-    try{
-        <READ> <LPAREN> <IDENTIFIER> vetor() <RPAREN> <SEMICOLON>
-    }catch(ParseException e){
-        reportaErro(e);
 
-    }
+        <READ> <LPAREN> <IDENTIFIER> vetor() <RPAREN> <SEMICOLON>
+
 }
 
 void saida():{}
 {
-    try{
         <SHOW> <LPAREN> idOuConst() <RPAREN> <SEMICOLON>
-    }catch(ParseException e){
-        reportaErro(e);
 
-    }
 }
 
 void idOuConst():{}
 {
-    try{
         <IDENTIFIER> vetor() listaIdOuConst() | constants() listaIdOuConst()
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
 }
 
 void listaIdOuConst():{}
 {
-    try{
         [ <COMMA> ( <IDENTIFIER>vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
-    }catch(ParseException e){
-        reportaErro(e);
-
-    }
 }
 
 void vetor():{}
 {
-    try{
        [ <LBRACKET> expressao()<RBRACKET> ]
-    }catch(ParseException e){
-        reportaErro(e);
 
-    }
 }
 
 void expressao(): {}{
-    try{
             expAritOuLogi() expressao1()
-    }catch(ParseException e){
-        reportaErro(e);
 
-    }
 }
 
 void expressao1(): {}
 {
-    try{
            [ ( <EQUAL> | <NOT_EQUAL> | <SHIFT_LEFT> | <SHIFT_RIGHT> | <SHIFT_LEFT_ASSIGN> | <SHIFT_RIGHT_ASSIGN> ) expAritOuLogi() ]
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
+
 }
 
 void expAritOuLogi(): {}
 {
-    try{
             termo2() menorPrioridade()
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
 }
 
 void menorPrioridade(): {}
 {
-    try{
         [ ( <PLUS> | <MINUS> | <PIPE> ) termo2() menorPrioridade() ]
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
 }
 
 void termo2(): {}
 {
-    try{
         termo1() mediaPrioridade()
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
 }
 
 void mediaPrioridade(): {}
 {
-    try{
         [ ( <STAR> | <SLASH> | <PERCENT> | <DOUBLE_PERCENT> | <AMPERSAND> ) termo1() mediaPrioridade() ]
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
 }
 
 void termo1(): {}
 {
-    try{
         elemento() maiorPrioridade()
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
+
 }
 
 void maiorPrioridade(): {}{
-    try{
         [ <POWER> elemento() maiorPrioridade() ]
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
+
 }
 
 void elemento(): {}
 {
-    try{
         (<IDENTIFIER> | constants() | [ <EXCLAMATION> ] <LPAREN> expressao() <RPAREN> )
-    }catch(ParseException e){
-        reportaErro(e);
-        
-    }
+
 }
 
 void repeticao(): {}
@@ -402,7 +373,7 @@ void repeticao(): {}
         listaDeComandos()
         <END> <SEMICOLON>
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(comandoRecSet, e, "lista de comandos");
 
     }
 }
@@ -415,7 +386,7 @@ void selecao(): {}
         ifelse()
         <END> <SEMICOLON>
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(comandoRecSet, e, "lista de comandos");
 
     }
 }
@@ -424,7 +395,7 @@ void ifelse(): {} {
     try{
         [ <ELSE> listaDeComandos() ]
     }catch(ParseException e){
-        reportaErro(e);
+        consumeUntil(comandoRecSet, e, "lista de comandos");
 
     }
 }
