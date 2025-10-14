@@ -19,15 +19,23 @@ public class Language2025x2 {
         return tokensEsperados.toString().trim();
     }
 
-    public static String run(java.io.Reader lexico){
-        Language2025x2 parser = new Language2025x2(lexico);
-        try{
-            parser.program();
-        }
-        catch (ParseException e){
-            return e.getMessage();
-        }
-        return "ok";
+    void reportaErro(ParseException e) {
+        System.err.println("ERRO SINTÁTICO: " + e.getMessage());
+        Token t = e.currentToken.next; // O token que causou o erro
+        errosSintaticos.append("Erro na linha ")
+                      .append(t.beginLine)
+                      .append(", coluna ")
+                      .append(t.beginColumn)
+                      .append(". Encontrado '")
+                      .append(t.image)
+                      .append("'.\n");
+
+        errosSintaticos.append("Encontrou: ")
+                        .append(t.image)
+                        .append(" Esperava: ")
+                        .append(criaListaEsperados(e.expectedTokenSequences))
+                        .append("\n");
+
     }
 
 
@@ -116,77 +124,65 @@ TOKEN : {
     | <ERROR_INVALID_SYMBOL: ~[]>
 }
 
-void program():{}
+void programa():{}
 {
         try{
             <BEGIN> [ <IDENTIFIER> ]
-            [ declaration() ]
+            [ declaracao() ]
             <START>
             listaDeComandos()
             <END> <DOT>
         }
         catch(ParseException e){
-            System.out.println(e.getMessage());
-            String tokensEsperados = criaListaEsperados(e.expectedTokenSequences);
-            System.out.println("Tokens esperados: " + tokensEsperados);
-            System.out.println("=======================");
-            errosSintaticos.append("Linha ").append(e.currentToken.next.beginLine).append(", coluna ").append(e.currentToken.next.beginColumn).append("\n");
+            reportaErro(e);
+            
         }
 }
 
 // DECLARACAO DE VARIAVEIS
-void declaration():{}
+void declaracao():{}
 {
     try{
-        <DEFINE> declarationsList()
+        <DEFINE> listaDeclaracao()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
-void declarationsList():{}
+void listaDeclaracao():{}
 {
     try{
-        manyIdentifiers() <COLON> types() manyTypes() <SEMICOLON>
-        [ declarationsList() ]
+        (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON>)+
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
-void manyIdentifiers():{}
+void variosIdentificadores():{}
 {
     try{
-        <IDENTIFIER> identifiersList()
+        <IDENTIFIER> listaIdentificadores()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
-void identifiersList():{}
+void listaIdentificadores():{}
 {
-    try{
-      [  <COMMA> <IDENTIFIER> identifiersList() ]
-    }catch(ParseException e){
-    }
+      (<COMMA> <IDENTIFIER>)*
 }
 
-void types():{}
+void tipos():{}
 {
-    try{
-        <TYPE_NUM> | <TYPE_REAL> | <TYPE_TEXT> | <TYPE_FLAG>
-    }catch(ParseException e){
-
-    }
+    <TYPE_NUM> | <TYPE_REAL> | <TYPE_TEXT> | <TYPE_FLAG>
 }
 
 void constants():{}
 {
-    try{
-        <NUM> | <REAL> | <TEXT> | <TRUE> | <FALSE>
-    }catch(ParseException e){
-
-    }
+    <NUM> | <REAL> | <TEXT> | <TRUE> | <FALSE>
 }
 
 void constantsDeclare():{}
@@ -194,7 +190,8 @@ void constantsDeclare():{}
     try{
         constants() constantsList()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -203,16 +200,18 @@ void constantsList():{}
     try{
         [ <COMMA> constantsDeclare() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
-void manyTypes():{}
+void variosTipos():{}
 {
     try{
         [ <ASSIGN> constants() | <LBRACKET> <NUM> <RBRACKET> vectorDeclare() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 
 }
@@ -222,14 +221,20 @@ void vectorDeclare():{}
     try{
         [ <ASSIGN> <LBRACE> constantsDeclare() <RBRACE> ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 //Comandos
 
 void listaDeComandos() :{}
 {
-    comando()
+    try{
+        comando()
+    }catch(ParseException e){
+        reportaErro(e);
+        
+    }
 }
 
 void comando():{}
@@ -238,7 +243,8 @@ void comando():{}
       ( atribuicao() | entrada() | saida() | selecao() | repeticao() ) [ listaDeComandos() ]
 
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -246,7 +252,8 @@ void atribuicao():{}{
     try{
         <SET> <IDENTIFIER> vetor() <ASSIGN> expressao() <SEMICOLON>
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -255,6 +262,8 @@ void entrada():{}
     try{
         <READ> <LPAREN> <IDENTIFIER> vetor() <RPAREN> <SEMICOLON>
     }catch(ParseException e){
+        reportaErro(e);
+        
     }
 }
 
@@ -263,6 +272,8 @@ void saida():{}
     try{
         <SHOW> <LPAREN> idOuConst() <RPAREN> <SEMICOLON>
     }catch(ParseException e){
+        reportaErro(e);
+        
     }
 }
 
@@ -271,7 +282,8 @@ void idOuConst():{}
     try{
         <IDENTIFIER> vetor() listaIdOuConst() | constants() listaIdOuConst()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -280,7 +292,8 @@ void listaIdOuConst():{}
     try{
         [ <COMMA> ( <IDENTIFIER>vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -289,25 +302,28 @@ void vetor():{}
     try{
        [ <LBRACKET> expressao()<RBRACKET> ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
 void expressao(): {}{
     try{
             expAritOuLogi() expressao1()
-        }catch(ParseException e){
-
-        }
+    }catch(ParseException e){
+        reportaErro(e);
+        
+    }
 }
 
 void expressao1(): {}
 {
     try{
            [ ( <EQUAL> | <NOT_EQUAL> | <SHIFT_LEFT> | <SHIFT_RIGHT> | <SHIFT_LEFT_ASSIGN> | <SHIFT_RIGHT_ASSIGN> ) expAritOuLogi() ]
-        }catch(ParseException e){
-
-        }
+    }catch(ParseException e){
+        reportaErro(e);
+        
+    }
 }
 
 void expAritOuLogi(): {}
@@ -315,7 +331,8 @@ void expAritOuLogi(): {}
     try{
             termo2() menorPrioridade()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -324,7 +341,8 @@ void menorPrioridade(): {}
     try{
         [ ( <PLUS> | <MINUS> | <PIPE> ) termo2() menorPrioridade() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -333,7 +351,8 @@ void termo2(): {}
     try{
         termo1() mediaPrioridade()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -342,7 +361,8 @@ void mediaPrioridade(): {}
     try{
         [ ( <STAR> | <SLASH> | <PERCENT> | <DOUBLE_PERCENT> | <AMPERSAND> ) termo1() mediaPrioridade() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -351,7 +371,8 @@ void termo1(): {}
     try{
         elemento() maiorPrioridade()
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -359,7 +380,8 @@ void maiorPrioridade(): {}{
     try{
         [ <POWER> elemento() maiorPrioridade() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -368,7 +390,8 @@ void elemento(): {}
     try{
         (<IDENTIFIER> | constants() | [ <EXCLAMATION> ] <LPAREN> expressao() <RPAREN> )
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -379,7 +402,8 @@ void repeticao(): {}
         listaDeComandos()
         <END> <SEMICOLON>
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -391,7 +415,8 @@ void selecao(): {}
         ifelse()
         <END> <SEMICOLON>
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }
 
@@ -399,6 +424,7 @@ void ifelse(): {} {
     try{
         [ <ELSE> listaDeComandos() ]
     }catch(ParseException e){
-
+        reportaErro(e);
+        
     }
 }

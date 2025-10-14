@@ -96,15 +96,42 @@ public class Build {
             }
 
             outputLog.append("\n--- Análise Léxica Concluída com Sucesso ---\n");
-            outputLog.append(Language2025x2.run(Reader.of(sourceCode)));
-            printSpecialTokens();
+
         } catch (TokenMgrError e) {
-            outputLog.append("\n--- ERRO LÉXICO INESPERADO ---\n");
-            outputLog.append(e.toString());
-        } catch (Exception e) {
-            outputLog.append("\n--- ERRO INTERNO INESPERADO ---\n");
-            outputLog.append(e.toString());
+            outputLog.append("\n--- ERRO LÉXICO ---\n");
+            outputLog.append(e.getMessage());
+            printSpecialTokens();
+            parent.getTextOutput().setText(outputLog.toString());
+            outputLog.setLength(0);
+            return;
         }
+
+
+        Language2025x2 parser = null;
+
+        try {
+            parser = new Language2025x2(new StringReader(sourceCode));
+            parser.programa();
+
+        } catch (ParseException e) {
+            outputLog.append("\n--- ERRO SINTÁTICO ---\n");
+            if (parser != null && parser.errosSintaticos.length() > 0) {
+                outputLog.append(parser.errosSintaticos.toString());
+            }
+            outputLog.append(e.getMessage());
+        } catch (TokenMgrError e) {
+            outputLog.append("\n--- ERRO LÉXICO (durante a análise sintática) ---\n");
+            outputLog.append(e.getMessage());
+        }
+
+        if (parser != null && parser.errosSintaticos.length() > 0) {
+            outputLog.append("\n--- Análise Sintática Concluída com Erro(s) ---\n");
+            outputLog.append(parser.errosSintaticos.toString());
+        } else if (parser != null) {
+            outputLog.append("\n--- Análise Sintática Concluída com Sucesso ---\n");
+        }
+
+        printSpecialTokens();
         parent.getTextOutput().setText(outputLog.toString());
         outputLog.setLength(0);
     }
