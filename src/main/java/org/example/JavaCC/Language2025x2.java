@@ -19,7 +19,7 @@ public class Language2025x2 implements Language2025x2Constants {
             }
         }
     }
-
+    static final RecoverySet programaRecSet = new RecoverySet(START, END, DOT, EOF); // verificar
     static final RecoverySet declaracaoRecSet = new RecoverySet(SEMICOLON, START);
     static final RecoverySet comandoRecSet = new RecoverySet(SEMICOLON, END, SET, READ, SHOW, IF, LOOP);
 
@@ -45,10 +45,10 @@ public class Language2025x2 implements Language2025x2Constants {
         String encontrado = t.image;
         String esperados = criaListaEsperados(e);
         String erroMsg = String.format(
-            "Erro Sint\u00e1tico na linha %d, coluna %d (na regra '%s'): Encontrado '%s', mas esperava um de: [%s]\n",
-            t.beginLine, t.beginColumn, met, encontrado, esperados);
+            "Erro Sint\u00e1tico na linha %d, coluna %d: Encontrado '%s', mas esperava %s\n",
+            t.beginLine, t.beginColumn, encontrado, esperados);
         errosSintaticos.append(erroMsg);
-        System.err.print(erroMsg);
+        //System.err.print(erroMsg);
     }
 
 
@@ -84,29 +84,34 @@ public class Language2025x2 implements Language2025x2Constants {
     trace_call("programa");
     try {
 
-      jj_consume_token(BEGIN);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case IDENTIFIER:{
-        jj_consume_token(IDENTIFIER);
-        break;
+      try {
+        jj_consume_token(BEGIN);
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case IDENTIFIER:{
+          jj_consume_token(IDENTIFIER);
+          break;
+          }
+        default:
+          jj_la1[0] = jj_gen;
+          ;
         }
-      default:
-        jj_la1[0] = jj_gen;
-        ;
-      }
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case DEFINE:{
-        declaracao();
-        break;
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case DEFINE:{
+          declaracao();
+          break;
+          }
+        default:
+          jj_la1[1] = jj_gen;
+          ;
         }
-      default:
-        jj_la1[1] = jj_gen;
-        ;
+        jj_consume_token(START);
+        listaDeComandos();
+        jj_consume_token(END);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(programaRecSet, e, "programa"); //criar recovery set
+
       }
-      jj_consume_token(START);
-      listaDeComandos();
-      jj_consume_token(END);
-      jj_consume_token(DOT);
     } finally {
       trace_return("programa");
     }

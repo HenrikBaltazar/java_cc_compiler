@@ -14,7 +14,6 @@ import java.util.List;
 
 public class Build {
     Interface parent;
-    StringBuilder outputLog = new StringBuilder();
     DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final List<String> RESERVED_WORDS = List.of("begin","define","start","end","set","num","real","text","flag","read","show","if","then","else","true","false");
     private static final List<String> SPECIAL_SYMBOLS = List.of("==", "!=", ";", "=", ":", ",", ".", "{", "}", "[", "]", "(", ")", "+", "-", ">>=", "*", "/", "%", "**", "%%", "<<", ">>","<<=", "!", "|" ,"&");
@@ -62,20 +61,42 @@ public class Build {
         return category;
     }
 
+    private StringBuilder sintaticBreakout(StringBuilder report){
+        record Dicionario(String recebido, String substituto) {}
+
+        List<Dicionario> dicionario = List.of(
+                new Dicionario("identifier", "um <b>identificador de variável</b> (ex.: myVar)")
+        );
+
+        for (Dicionario d : dicionario) {
+            int idx = report.indexOf(d.recebido);
+            if (idx != -1) {
+                report.replace(idx, idx + d.recebido.length(), d.substituto);
+            }
+        }
+        return report;
+    }
+
     public void buildCode() {
-        outputLog.append(parent.getTextOutput().getText()+"\n\n");
-        outputLog.append("--- Compilacao Iniciada em: ").append(LocalDateTime.now().format(formatador)).append(" ---\n\n");
+        StringBuilder css = new StringBuilder(
+                ".title{color:red;text-decoration:underline;}"+
+                "body{font-family:Arial,sans-serif;font-size:x-large;}"
+        );
+        StringBuilder outputLog = new StringBuilder(
+                "<html>" +
+                        "<head><style>"+css+"</style></head>" +
+                        "<body>"
+        );
+        outputLog.append("<p class='title'>--- Análise iniciada em: ").append(LocalDateTime.now().format(formatador)).append(" ---</p></br>");
         String sourceCode = parent.getTextInput().getText();
         specialTokensList = new ArrayList<>();
+        boolean lexicalApproved = false;
         try {
             SimpleCharStream inputReader = new SimpleCharStream(Reader.of(sourceCode));
             Language2025x2TokenManager tokenManager = new Language2025x2TokenManager(inputReader);
             Token token;
             while (true) {
                 token = tokenManager.getNextToken();
-                if (token.specialToken != null) {
-                    collectSpecialTokens(token.specialToken);
-                }
                 if (token.kind == Language2025x2Constants.EOF) {
                     break;
                 }
@@ -85,85 +106,60 @@ public class Build {
 
                 String category = Language2025x2Constants.tokenImage[token.kind].replace("\"", "").replace(" ", "").replace("\n", "");
                 category = fixCategory(category);
-                String tokenInfo = String.format("Lexema: %-15s | Linha: %-3d | Coluna: %-3d | Código: %s | Categoria: %s \n",
+                String tokenInfo = String.format("Lexema: %-15s | Linha: %-3d | Coluna: %-3d | Código: %s | Categoria: %s",
                         token.image.replace(" ", "").replace("\n", ""),
                         token.beginLine,
                         token.beginColumn,
                         token.kind < 10 ? token.kind + " " : token.kind,
                         category
                 );
-               // outputLog.append(tokenInfo);
+                System.out.println(tokenInfo);
+                if(category.contains("ERRO")) {
+                    String lexicalReport = String.format("Erro Lexico na linha %-3d, coluna %-3d: Encontrado '%-15', mas esperava [%s]\n",
+                            token.beginLine,
+                            token.beginColumn,
+                            token.image.replace(" ", "").replace("\n", ""),
+                            category
+                            );
+                    outputLog.append(lexicalReport);
+                }
             }
-
-            //outputLog.append("\n--- Análise Léxica Concluída com Sucesso ---\n");
+            System.out.println("Nenhum erro lexico encontrado, seguindo analise sintatica...");
+            lexicalApproved = true;
 
         } catch (TokenMgrError e) {
             outputLog.append("\n--- ERRO LÉXICO ---\n");
             outputLog.append(e.getMessage());
-            printSpecialTokens();
+
             parent.getTextOutput().setText(outputLog.toString());
             outputLog.setLength(0);
             return;
         }
-
-
         Language2025x2 parser = null;
-
-        try {
-            parser = new Language2025x2(new StringReader(sourceCode));
-            parser.programa();
-
-        } catch (ParseException e) {
-            outputLog.append("\n--- ERRO SINTÁTICO ---\n");
-            if (parser != null && parser.errosSintaticos.length() > 0) {
-                outputLog.append(parser.errosSintaticos.toString());
+        if(lexicalApproved) {
+            try {
+                parser = new Language2025x2(new StringReader(sourceCode));
+                parser.programa();
+                if (parser != null && parser.errosSintaticos.length() > 0) {
+                    outputLog.append(sintaticBreakout(parser.errosSintaticos));
+                }
+            } catch (ParseException e) {
+                outputLog.append("\n--- ERRO SINTÁTICO ---\n");
+                if (parser != null && parser.errosSintaticos.length() > 0) {
+                    outputLog.append(parser.errosSintaticos);
+                }
+            } catch (TokenMgrError e) {
+                outputLog.append("\n--- ERRO LÉXICO (durante a análise sintática) ---\n");
+                outputLog.append(e.getMessage());
             }
-            outputLog.append(e.getMessage());
-        } catch (TokenMgrError e) {
-            outputLog.append("\n--- ERRO LÉXICO (durante a análise sintática) ---\n");
-            outputLog.append(e.getMessage());
         }
-
-        if (parser != null && parser.errosSintaticos.length() > 0) {
-            outputLog.append("\n--- Análise Sintática Concluída com Erro(s) ---\n");
-            outputLog.append(parser.errosSintaticos.toString());
-        } else if (parser != null) {
-            outputLog.append("\n--- Análise Sintática Concluída com Sucesso ---\n");
-        }
-
-        printSpecialTokens();
+        outputLog.append(
+                "</body>" +
+                        "</html>"
+        );
+        System.out.println(outputLog.toString());
         parent.getTextOutput().setText(outputLog.toString());
         outputLog.setLength(0);
-    }
-    /**
-     * Coleta os special tokens. A lista encadeada 'specialToken' aponta para trás,
-     * então precisamos iterar e adicionar na nossa lista.
-     */
-    private void collectSpecialTokens(Token initialSpecialToken) {
-        Token current = initialSpecialToken;
-        while (current != null) {
-            specialTokensList.add(current);
-            current = current.specialToken;
-        }
-    }
-
-    /**
-     * Imprime os special tokens coletados formatados.
-     */
-    private void printSpecialTokens() {
-        if (!specialTokensList.isEmpty()) {
-            outputLog.append("\n--- Special Tokens Encontrados (Comentários) ---\n");
-
-            // Reverte a lista para imprimir na ordem cronológica de aparição no código
-            Collections.reverse(specialTokensList);
-
-            for (Token st : specialTokensList) {
-                String category = Language2025x2Constants.tokenImage[st.kind].replace("\"", "");
-                String content = st.image.replace("\n", " ").replace("\r", "").trim(); // Limpa a formatação
-                outputLog.append(String.format("Tipo: %-20s | Linha: %-3d | Conteúdo: \"%s\"\n",
-                        category, st.beginLine, content));
-            }
-        }
     }
 
 }

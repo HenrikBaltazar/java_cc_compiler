@@ -24,7 +24,7 @@ public class Language2025x2 {
             }
         }
     }
-
+    static final RecoverySet programaRecSet = new RecoverySet(START, END, DOT, EOF); // verificar
     static final RecoverySet declaracaoRecSet = new RecoverySet(SEMICOLON, START);
     static final RecoverySet comandoRecSet = new RecoverySet(SEMICOLON, END, SET, READ, SHOW, IF, LOOP);
 
@@ -50,10 +50,10 @@ public class Language2025x2 {
         String encontrado = t.image;
         String esperados = criaListaEsperados(e);
         String erroMsg = String.format(
-            "Erro Sintático na linha %d, coluna %d (na regra '%s'): Encontrado '%s', mas esperava um de: [%s]\n",
-            t.beginLine, t.beginColumn, met, encontrado, esperados);
+            "Erro Sintático na linha %d, coluna %d: Encontrado '%s', mas esperava %s\n",
+            t.beginLine, t.beginColumn, encontrado, esperados);
         errosSintaticos.append(erroMsg);
-        System.err.print(erroMsg);
+        //System.err.print(erroMsg);
     }
 
 
@@ -170,12 +170,15 @@ TOKEN : {
 
 void programa():{}
 {
-    <BEGIN> [ <IDENTIFIER> ]
-    [ declaracao() ]
-    <START>
-    listaDeComandos()
-    <END> <DOT>
-
+    try{
+        <BEGIN> [ <IDENTIFIER> ]
+        [ declaracao() ]
+        <START>
+        listaDeComandos()
+        <END> <DOT>
+    }catch(ParseException e){
+        consumeUntil(programaRecSet, e, "programa"); //criar recovery set
+    }
 }
 
 // DECLARACAO DE VARIAVEIS
