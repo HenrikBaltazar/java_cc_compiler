@@ -5,6 +5,7 @@ import org.example.Actions.FileManager;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 import javax.swing.*;
 
 public class Interface extends JFrame {
@@ -16,14 +17,6 @@ public class Interface extends JFrame {
     private String windowTitle = "Compilador";
     private Shortcut shortcut;
     public Build build;
-    private JDialog jHelpDialog;
-    private static String ajuda =
-            "<html><body style='font-family: sans-serif;'>" +
-                    "<h3>ATALHOS:</h3>" +
-                    "CTRL+S: SALVAR<br>" +
-                    "CTRL+SHIFT+A: ABRIR ARQUIVO<br>" +
-                    "CTRL+N: NOVO ARQUIVO<br>" +
-                    "</body></html>";
     public Interface(Build build) {
         this.build = build;
         fileManager = new FileManager(this);
@@ -49,7 +42,7 @@ public class Interface extends JFrame {
                 textInput, textOutput
         );
         splitPane.setOneTouchExpandable(true);
-        splitPane.setResizeWeight(0.70);
+        splitPane.setResizeWeight(0.40);
         SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.72));
 
         setJMenuBar(new WindowBar(this));
@@ -95,14 +88,28 @@ public class Interface extends JFrame {
     }
 
     public void openHelpWindow() {
-        jHelpDialog = new JDialog(this, "Ajuda", true);
+        JDialog jHelpDialog = new JDialog(this, "Ajuda", true);
         jHelpDialog.setLocationRelativeTo(this);
         jHelpDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        jHelpDialog.setMinimumSize(new Dimension(W,H));
-        jHelpDialog.setResizable(false);
-        JLabel jHelpLabel = new JLabel(ajuda);
-        jHelpLabel.setVisible(true);
-        jHelpDialog.add(jHelpLabel, BorderLayout.PAGE_START);
+        jHelpDialog.setMinimumSize(new Dimension(W, H));
+        jHelpDialog.setResizable(true);
+
+        JEditorPane jHelpPane = new JEditorPane();
+        jHelpPane.setEditable(false);
+        jHelpPane.setContentType("text/html");
+        URL helpUrl = getClass().getResource("/ajuda.html");
+        try {
+            jHelpPane.setPage(helpUrl);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        jHelpPane.setCaretPosition(0);
+        JScrollPane scrollPane = new JScrollPane(jHelpPane);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        jHelpDialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
         jHelpDialog.setVisible(true);
     }
 

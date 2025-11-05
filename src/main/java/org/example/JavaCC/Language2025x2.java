@@ -29,7 +29,7 @@ public class Language2025x2 implements Language2025x2Constants {
             for (int j = 0; j < e.expectedTokenSequences[i].length; j++) {
                 String tokenImage = e.tokenImage[e.expectedTokenSequences[i][j]];
                 String tokenLimpo = tokenImage.replaceAll("^<|>$", "").replaceAll("\"", "");
-                tokensEsperados.add(tokenLimpo.toLowerCase());
+                tokensEsperados.add("@"+tokenLimpo.toLowerCase());
             }
         }
         return String.join(", ", tokensEsperados);
@@ -45,8 +45,8 @@ public class Language2025x2 implements Language2025x2Constants {
         String encontrado = t.image;
         String esperados = criaListaEsperados(e);
         String erroMsg = String.format(
-            "Erro Sint\u00e1tico na linha %d, coluna %d: Encontrado '%s', mas esperava %s\n",
-            t.beginLine, t.beginColumn, encontrado, esperados);
+            "<div class='log-entry'><span class='line-info'>Erro Sint\u00e1tico na linha %d, coluna %d:</span><br> Encontrado <span class='found'>@%s</span>, mas esperava <span class='expected'>@%s</span></div>\n",
+            t.beginLine, t.beginColumn, encontrado.equals("@") || encontrado.equals("@ ") || encontrado.equals(" ") || encontrado.isEmpty() ? "espaco" : encontrado, esperados);
         errosSintaticos.append(erroMsg);
         //System.err.print(erroMsg);
     }

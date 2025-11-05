@@ -4,7 +4,7 @@ begin
 define
 
 
-
+start
 start
 	set x[3+y-z] = 100;
 end.

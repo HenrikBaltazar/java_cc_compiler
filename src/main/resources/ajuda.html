@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajuda da Interface</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #fafafa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            overflow-y: scroll;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        h2 {
+            margin-top: 25px;
+        }
+        .section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 25px;
+        }
+        code {
+            background: #eee;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-family: Consolas, monospace;
+        }
+        .toolbar img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        footer {
+            margin-top: 40px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Ajuda da Interface do Editor</h1>
+
+<div class="section toolbar">
+    <h2>Barra de Ferramentas (ToolBar)</h2>
+    <p>A barra de ferramentas contém atalhos rápidos para as principais ações do editor:</p>
+    <ul>
+        <li><b><img src="icon_new.png"> Novo arquivo</b> — Cria um novo documento em branco. (<code>CTRL+N</code>)</li>
+        <li><b><img src="icon_open.png"> Abrir arquivo</b> — Abre um arquivo existente no editor. (<code>CTRL+SHIFT+A</code>)</li>
+        <li><b><img src="icon_save.png"> Salvar</b> — Salva o arquivo atual. (<code>CTRL+S</code>)</li>
+        <li><b><img src="icon_cut.png"> Recortar</b> — Recorta o texto selecionado. (<code>CTRL+X</code>)</li>
+        <li><b><img src="icon_copy.png"> Copiar</b> — Copia o texto selecionado. (<code>CTRL+C</code>)</li>
+        <li><b><img src="icon_paste.png"> Colar</b> — Cola o texto da área de transferência. (<code>CTRL+V</code>)</li>
+        <li><b><img src="icon_build.png"> Compilar</b> — Compila o código atual (salva antes de compilar).</li>
+        <li><b><img src="icon_run.png"> Executar</b> — Executa o código (sem salvar obrigatoriamente).</li>
+        <li><b><img src="icon_clear.png"> Limpar saída</b> — Limpa a área de saída.</li>
+        <li><b><img src="icon_help.png"> Ajuda</b> — Abre esta janela de ajuda.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>Menu Superior (WindowBar)</h2>
+    <p>Os menus permitem acesso às mesmas funções da barra de ferramentas, além de opções adicionais:</p>
+    <ul>
+        <li><b>Arquivo</b> — Novo, Abrir, Salvar, Salvar como...</li>
+        <li><b>Edição</b> — Desfazer, Refazer, Copiar, Cortar, Colar.</li>
+        <li><b>Compilação</b> — Compilar, Executar e Limpar saída.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>Painel de Entrada de Texto</h2>
+    <p>O painel principal de edição possui uma área de texto com numeração de linhas à esquerda. Essa numeração facilita a navegação e depuração do código.</p>
+    <p>O editor também atualiza a posição do cursor, exibindo a linha e coluna atuais no rodapé da interface.</p>
+</div>
+
+<div class="section">
+    <h2>Painel de Saída</h2>
+    <p>Logo abaixo do editor, há um painel de saída que mostra mensagens de compilação, erros e o resultado da execução do programa.</p>
+    <p>Essa área é limpa automaticamente ao compilar ou executar um código, ou manualmente pelo botão <b>“Limpar saída”</b>.</p>
+</div>
+
+<div class="section">
+    <h2>Divisão dos Painéis (JSplitPane)</h2>
+    <p>Os painéis de entrada e saída são separados por um elemento <code>JSplitPane</code>, que permite ajustar a proporção de espaço entre eles.</p>
+    <p>Você pode clicar e arrastar a barra divisória para aumentar ou diminuir o tamanho do editor ou da saída, conforme sua preferência.</p>
+</div>
+
+<div class="section">
+    <h2>Rodapé (Footer)</h2>
+    <p>Na parte inferior da janela, o rodapé exibe informações úteis como:</p>
+    <ul>
+        <li><b>Linha:</b> número da linha atual do cursor.</li>
+        <li><b>Coluna:</b> posição da coluna atual dentro da linha.</li>
+    </ul>
+    <p>Essas informações são atualizadas em tempo real conforme o usuário move o cursor no editor.</p>
+</div>
+
+<footer>
+    © 2025 — Interface de Edição e Compilação • Manual de Ajuda
+</footer>
+
+</body>
+</html>

@@ -11,8 +11,6 @@ public class TextOutput extends JPanel {
     private static final Font FONT_OUTPUT = new Font("Monospaced", Font.PLAIN, 20);
     private JLabel RowsColunmLabel = new JLabel("Linha: 1 ; Coluna: 1");
     TextOutput(){
-        //textArea.setRows(20);
-        //textArea.setColumns(60);
         textArea.setEditable(false);
         textArea.setFont(FONT_OUTPUT);
         textArea.setContentType("text/html");

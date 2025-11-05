@@ -63,15 +63,80 @@ public class Build {
 
     private StringBuilder sintaticBreakout(StringBuilder report){
         record Dicionario(String recebido, String substituto) {}
-
+        //new Dicionario("","" )
         List<Dicionario> dicionario = List.of(
-                new Dicionario("identifier", "um <b>identificador de variável</b> (ex.: myVar)")
+                new Dicionario("identifier", "identificador de variável"),
+
+                // Símbolos estruturais
+                new Dicionario("@{", "abre chaves '{'"),
+                new Dicionario("@}", "fecha chaves '}'"),
+                new Dicionario("@[", "abre colchetes '['"),
+                new Dicionario("@]", "fecha colchetes ']'"),
+                new Dicionario("@(", "abre parênteses '('"),
+                new Dicionario("@)", "fecha parênteses ')'"),
+                new Dicionario("@espaco", "espaço vazio ' '"),
+                new Dicionario("@:", "dois pontos ':'"),
+                new Dicionario("@;", "ponto e vírgula ';'"),
+
+                // Palavras reservadas
+                new Dicionario("@begin", "palavra reservada 'begin'"),
+                new Dicionario("@define", "palavra reservada 'define'"),
+                new Dicionario("@start", "palavra reservada 'start'"),
+                new Dicionario("@end", "palavra reservada 'end'"),
+                new Dicionario("@set", "palavra reservada 'set'"),
+                new Dicionario("@num", "palavra reservada 'num'"),
+                new Dicionario("@real", "palavra reservada 'real'"),
+                new Dicionario("@text", "palavra reservada 'text'"),
+                new Dicionario("@flag", "palavra reservada 'flag'"),
+                new Dicionario("@read", "palavra reservada 'read'"),
+                new Dicionario("@show", "palavra reservada 'show'"),
+                new Dicionario("@if", "palavra reservada 'if'"),
+                new Dicionario("@then", "palavra reservada 'then'"),
+                new Dicionario("@else", "palavra reservada 'else'"),
+                new Dicionario("@true", "palavra reservada 'true'"),
+                new Dicionario("@false", "palavra reservada 'false'"),
+
+                // Símbolos especiais (HTML seguro)
+                new Dicionario("@==", "operador de igualdade '=='"),
+                new Dicionario("@!=", "operador de diferença '!='"),
+                new Dicionario("@;", "ponto e vírgula ';'"),
+                new Dicionario("@=", "atribuição '='"),
+                new Dicionario("@:", "dois pontos ':'"),
+                new Dicionario("@,", "vírgula ','"),
+                new Dicionario("@.", "ponto '.'"),
+                new Dicionario("@{", "abre chaves '{'"),
+                new Dicionario("@}", "fecha chaves '}'"),
+                new Dicionario("@[", "abre colchetes '['"),
+                new Dicionario("@]", "fecha colchetes ']'"),
+                new Dicionario("@(", "abre parênteses '('"),
+                new Dicionario("@)", "fecha parênteses ')'"),
+                new Dicionario("@+", "soma '+'"),
+                new Dicionario("@-", "subtração '-'"),
+                new Dicionario("@*", "multiplicação '*'"),
+                new Dicionario("@/", "divisão '/'"),
+                new Dicionario("@%", "resto '%'"),
+                new Dicionario("@**", "exponenciação '**'"),
+                new Dicionario("@%%", "resto inteiro '%%'"),
+                new Dicionario("@&", "e lógico '&amp;'"),              // HTML seguro
+                new Dicionario("@|", "ou lógico '|'"),
+                new Dicionario("@!", "negação lógica '!'"),
+                new Dicionario("@<", "menor que '&lt;'"),             // HTML seguro
+                new Dicionario("@>", "maior que '&gt;'"),             // HTML seguro
+                new Dicionario("@<<", "deslocamento à esquerda '&lt;&lt;'"),  // HTML seguro
+                new Dicionario("@>>", "deslocamento à direita '&gt;&gt;'"),   // HTML seguro
+                new Dicionario("@<<=", "atribuição com deslocamento à esquerda '&lt;&lt;='"), // HTML seguro
+                new Dicionario("@>>=", "atribuição com deslocamento à direita '&gt;&gt;='"),  // HTML seguro
+
+                // Último — remover marcações
+                new Dicionario("@", "")
         );
+
 
         for (Dicionario d : dicionario) {
             int idx = report.indexOf(d.recebido);
-            if (idx != -1) {
+            while (idx != -1) {
                 report.replace(idx, idx + d.recebido.length(), d.substituto);
+                idx = report.indexOf(d.recebido, idx + d.substituto.length());
             }
         }
         return report;
@@ -79,15 +144,47 @@ public class Build {
 
     public void buildCode() {
         StringBuilder css = new StringBuilder(
-                ".title{color:red;text-decoration:underline;}"+
-                "body{font-family:Arial,sans-serif;font-size:x-large;}"
+                """
+                body {
+                     background-color: #fafafa;
+                     color: #222;
+                     font-family: 'Consolas', 'Courier New', monospace;
+                     margin: 20px;
+                     font-size: 18px;
+                 }
+                 h1 {
+                     font-size: 24px;
+                     color: #444;
+                     margin-bottom: 10px;
+                     border-bottom: 1px solid #ddd;
+                     padding-bottom: 5px;
+                 }
+                 .log-entry {
+                     padding: 6px 18px;
+                     border-left: 3px solid #e74c3c;
+                     background-color: #fff;
+                     margin: 5px 0;
+                     border-radius: 4px;
+                 }
+                 .line-info {
+                     color: #555;
+                 }
+                 .found {
+                     color: #c0392b;
+                     font-weight: bold;
+                 }
+                 .expected {
+                     color: #2980b9;
+                     font-weight: bold;
+                 }
+                """
         );
         StringBuilder outputLog = new StringBuilder(
                 "<html>" +
                         "<head><style>"+css+"</style></head>" +
                         "<body>"
         );
-        outputLog.append("<p class='title'>--- Análise iniciada em: ").append(LocalDateTime.now().format(formatador)).append(" ---</p></br>");
+        outputLog.append("<h1>Análise iniciada em: ").append(LocalDateTime.now().format(formatador)).append("</h1></br>");
         String sourceCode = parent.getTextInput().getText();
         specialTokensList = new ArrayList<>();
         boolean lexicalApproved = false;
