@@ -215,7 +215,7 @@ public class Build {
                     String lexicalReport = String.format("Erro Lexico na linha %-3d, coluna %-3d: Encontrado '%-15', mas esperava [%s]\n",
                             token.beginLine,
                             token.beginColumn,
-                            token.image.replace(" ", "").replace("\n", ""),
+                            token.image.replace(" ", "").replace("\n", "").toString(),
                             category
                             );
                     outputLog.append(lexicalReport);
