@@ -27,6 +27,12 @@ public class TextOutput extends JPanel {
         textArea.setText(text);
     }
 
+    public void clear(){
+        textArea.setContentType("text/plain");
+        textArea.setText("");
+        textArea.setContentType("text/html");
+    }
+
     public String getText(){
         return textArea.getText();
     }

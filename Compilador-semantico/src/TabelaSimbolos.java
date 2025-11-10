@@ -1,4 +1,4 @@
-/* import java.util.HashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class TabelaSimbolos {
@@ -23,4 +23,4 @@ public class TabelaSimbolos {
     public Simbolo obterSimbolo(String nome) {
         return simbolos.get(nome);
     }
-}*/
+}

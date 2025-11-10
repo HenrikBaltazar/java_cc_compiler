@@ -3,6 +3,9 @@ package org.example.Actions;
 import org.example.JavaCC.*;
 import org.example.ui.Interface;
 
+import javax.swing.*;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
 import java.io.Reader;
 import java.io.StringReader;
 import java.time.LocalDateTime;
@@ -11,6 +14,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Build {
     Interface parent;
@@ -68,77 +73,94 @@ public class Build {
                 new Dicionario("identifier", "identificador de variável"),
 
                 // Símbolos estruturais
-                new Dicionario("@{", "abre chaves '{'"),
-                new Dicionario("@}", "fecha chaves '}'"),
-                new Dicionario("@[", "abre colchetes '['"),
-                new Dicionario("@]", "fecha colchetes ']'"),
-                new Dicionario("@(", "abre parênteses '('"),
-                new Dicionario("@)", "fecha parênteses ')'"),
+                new Dicionario("@{", "abre chaves <i>{</i>"),
+                new Dicionario("@}", "fecha chaves <i>}</i>"),
+                new Dicionario("@[", "abre colchetes <i>[</i>"),
+                new Dicionario("@]", "fecha colchetes <i>]</i>"),
+                new Dicionario("@(", "abre parênteses <i>(</i>"),
+                new Dicionario("@)", "fecha parênteses <i>)</i>"),
                 new Dicionario("@espaco", "espaço vazio ' '"),
-                new Dicionario("@:", "dois pontos ':'"),
-                new Dicionario("@;", "ponto e vírgula ';'"),
+                new Dicionario("@:", "dois pontos <i>:</i>"),
+                new Dicionario("@;", "ponto e vírgula <i>;</i>"),
 
                 // Palavras reservadas
-                new Dicionario("@begin", "palavra reservada 'begin'"),
-                new Dicionario("@define", "palavra reservada 'define'"),
-                new Dicionario("@start", "palavra reservada 'start'"),
-                new Dicionario("@end", "palavra reservada 'end'"),
-                new Dicionario("@set", "palavra reservada 'set'"),
-                new Dicionario("@num", "palavra reservada 'num'"),
-                new Dicionario("@real", "palavra reservada 'real'"),
-                new Dicionario("@text", "palavra reservada 'text'"),
-                new Dicionario("@flag", "palavra reservada 'flag'"),
-                new Dicionario("@read", "palavra reservada 'read'"),
-                new Dicionario("@show", "palavra reservada 'show'"),
-                new Dicionario("@if", "palavra reservada 'if'"),
-                new Dicionario("@then", "palavra reservada 'then'"),
-                new Dicionario("@else", "palavra reservada 'else'"),
-                new Dicionario("@true", "palavra reservada 'true'"),
-                new Dicionario("@false", "palavra reservada 'false'"),
+                new Dicionario("@begin", " <i>begin</i>"),
+                new Dicionario("@define", " <i>define</i>"),
+                new Dicionario("@start", " <i>start</i>"),
+                new Dicionario("@end", " <i>end</i>"),
+                new Dicionario("@set", " <i>set</i>"),
+                new Dicionario("@num", " <i>num</i>"),
+                new Dicionario("@real", " <i>real</i>"),
+                new Dicionario("@text", " <i>text</i>"),
+                new Dicionario("@flag", " <i>flag</i>"),
+                new Dicionario("@read", " <i>read</i>"),
+                new Dicionario("@show", " <i>show</i>"),
+                new Dicionario("@if", " <i>if</i>"),
+                new Dicionario("@then", " <i>then</i>"),
+                new Dicionario("@else", " <i>else</i>"),
+                new Dicionario("@true", " <i>true</i>"),
+                new Dicionario("@false", " <i>false</i>"),
+                new Dicionario("@loop", " <i>loop</i>"),
 
                 // Símbolos especiais (HTML seguro)
-                new Dicionario("@==", "operador de igualdade '=='"),
-                new Dicionario("@!=", "operador de diferença '!='"),
-                new Dicionario("@;", "ponto e vírgula ';'"),
-                new Dicionario("@=", "atribuição '='"),
-                new Dicionario("@:", "dois pontos ':'"),
-                new Dicionario("@,", "vírgula ','"),
-                new Dicionario("@.", "ponto '.'"),
-                new Dicionario("@{", "abre chaves '{'"),
-                new Dicionario("@}", "fecha chaves '}'"),
-                new Dicionario("@[", "abre colchetes '['"),
-                new Dicionario("@]", "fecha colchetes ']'"),
-                new Dicionario("@(", "abre parênteses '('"),
-                new Dicionario("@)", "fecha parênteses ')'"),
-                new Dicionario("@+", "soma '+'"),
-                new Dicionario("@-", "subtração '-'"),
-                new Dicionario("@*", "multiplicação '*'"),
-                new Dicionario("@/", "divisão '/'"),
-                new Dicionario("@%", "resto '%'"),
-                new Dicionario("@**", "exponenciação '**'"),
-                new Dicionario("@%%", "resto inteiro '%%'"),
-                new Dicionario("@&", "e lógico '&amp;'"),              // HTML seguro
-                new Dicionario("@|", "ou lógico '|'"),
-                new Dicionario("@!", "negação lógica '!'"),
-                new Dicionario("@<", "menor que '&lt;'"),             // HTML seguro
-                new Dicionario("@>", "maior que '&gt;'"),             // HTML seguro
-                new Dicionario("@<<", "deslocamento à esquerda '&lt;&lt;'"),  // HTML seguro
-                new Dicionario("@>>", "deslocamento à direita '&gt;&gt;'"),   // HTML seguro
-                new Dicionario("@<<=", "atribuição com deslocamento à esquerda '&lt;&lt;='"), // HTML seguro
-                new Dicionario("@>>=", "atribuição com deslocamento à direita '&gt;&gt;='"),  // HTML seguro
+                new Dicionario("@==", "operador de igualdade <i>==</i>"),
+                new Dicionario("@!=", "operador de diferença <i>!=</i>"),
+                new Dicionario("@;", "ponto e vírgula <i>;</i>"),
+                new Dicionario("@=", "atribuição <i>=</i>"),
+                new Dicionario("@:", "dois pontos <i>:</i>"),
+                new Dicionario("@,", "vírgula <i>,</i>"),
+                new Dicionario("@.", "ponto <i>.</i>"),
+                new Dicionario("@{", "abre chaves <i>{</i>"),
+                new Dicionario("@}", "fecha chaves <i>}</i>"),
+                new Dicionario("@[", "abre colchetes <i>[</i>"),
+                new Dicionario("@]", "fecha colchetes <i>]</i>"),
+                new Dicionario("@(", "abre parênteses <i>(</i>"),
+                new Dicionario("@)", "fecha parênteses <i>)</i>"),
+                new Dicionario("@+", "soma <i>+</i>"),
+                new Dicionario("@-", "subtração <i>-</i>"),
+                new Dicionario("@*", "multiplicação <i>*</i>"),
+                new Dicionario("@/", "divisão <i>/</i>"),
+                new Dicionario("@%", "resto <i>%</i>"),
+                new Dicionario("@**", "exponenciação <i>**</i>"),
+                new Dicionario("@%%", "resto inteiro <i>%%</i>"),
+                new Dicionario("@&", "e lógico <i>&amp;</i>"),              // HTML seguro
+                new Dicionario("@|", "ou lógico <i>|</i>"),
+                new Dicionario("@!", "negação lógica <i>!</i>"),
+                new Dicionario("@<", "menor que <i>&lt;</i>"),             // HTML seguro
+                new Dicionario("@>", "maior que <i>&gt;</i>"),             // HTML seguro
+                new Dicionario("@<<", "deslocamento à esquerda <i>&lt;&lt;</i>"),  // HTML seguro
+                new Dicionario("@>>", "deslocamento à direita <i>&gt;&gt;</i>"),   // HTML seguro
+                new Dicionario("@<<=", "atribuição com deslocamento à esquerda <i>&lt;&lt;=</i>"), // HTML seguro
+                new Dicionario("@>>=", "atribuição com deslocamento à direita <i>&gt;&gt;=</i>"),  // HTML seguro
 
                 // Último — remover marcações
                 new Dicionario("@", "")
         );
 
 
+        int start = report.indexOf("<span class='expected'>");
+        String regex = "<div class='log-entry'>.*?palavra reservada:.*?</div>";
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(report.toString());
         for (Dicionario d : dicionario) {
             int idx = report.indexOf(d.recebido);
             while (idx != -1) {
+                if (RESERVED_WORDS.contains(d.recebido.replace("@","")) && !report.toString().contains("palavra reservada:")) {
+                    if (start != -1) {
+                        start += "<span class='expected'>".length();
+                        report.insert(start, "palavra reservada: ");
+                    }
+                }
                 report.replace(idx, idx + d.recebido.length(), d.substituto);
                 idx = report.indexOf(d.recebido, idx + d.substituto.length());
             }
         }
+
+        int lastComma = report.lastIndexOf(",");
+        if (lastComma != -1) {
+            report = report.replace(lastComma, lastComma + 1, " ou");
+        }
+
         return report;
     }
 
@@ -158,6 +180,32 @@ public class Build {
                      margin-bottom: 10px;
                      border-bottom: 1px solid #ddd;
                      padding-bottom: 5px;
+                 }
+                 .success {
+                     color: #155724;
+                     background-color: #d4edda;
+                     border: 1px solid #c3e6cb;
+                     border-radius: 8px;
+                     padding: 10px 14px;
+                     font-family: 'Segoe UI', Arial, sans-serif;
+                     font-size: 16px;
+                     font-weight: 600;
+                     text-align: center;
+                     margin: 12px 0;
+                     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                 }
+                 .error {
+                     color: #721c24;
+                     background-color: #f8d7da;
+                     border: 1px solid #f5c6cb;
+                     border-radius: 8px;
+                     padding: 10px 14px;
+                     font-family: 'Segoe UI', Arial, sans-serif;
+                     font-size: 16px;
+                     font-weight: 700;
+                     text-align: center;
+                     margin: 12px 0;
+                     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
                  }
                  .log-entry {
                      padding: 6px 18px;
@@ -187,7 +235,9 @@ public class Build {
         outputLog.append("<h1>Análise iniciada em: ").append(LocalDateTime.now().format(formatador)).append("</h1></br>");
         String sourceCode = parent.getTextInput().getText();
         specialTokensList = new ArrayList<>();
-        boolean lexicalApproved = false;
+        boolean lexicalApproved = true, sintaticApproved = false, semanticApproved = false;
+        StringBuilder lexicalLog = new StringBuilder();
+        ArrayList<ArrayList<String>> codigIn = new ArrayList<>();
         try {
             SimpleCharStream inputReader = new SimpleCharStream(Reader.of(sourceCode));
             Language2025x2TokenManager tokenManager = new Language2025x2TokenManager(inputReader);
@@ -212,51 +262,114 @@ public class Build {
                 );
                 System.out.println(tokenInfo);
                 if(category.contains("ERRO")) {
-                    String lexicalReport = String.format("Erro Lexico na linha %-3d, coluna %-3d: Encontrado '%-15', mas esperava [%s]\n",
+                    String lexicalReport = String.format("<div class='log-entry'><span class='line-info'>Erro Lexico na linha %-3d, coluna %-3d:</span><br>  Encontrado  <span class='expected'>%s</span> <b>→</b> <span class='found'>%-15s</span></div>\n",
                             token.beginLine,
                             token.beginColumn,
-                            token.image.replace(" ", "").replace("\n", "").toString(),
-                            category
+                            category.replace("ERRO LÉXICO: ", ""),
+                            token.image.replace(" ", "").replace("\n", "")
                             );
-                    outputLog.append(lexicalReport);
+                    lexicalLog.append(lexicalReport);
+                    lexicalApproved = false;
                 }
             }
-            System.out.println("Nenhum erro lexico encontrado, seguindo analise sintatica...");
-            lexicalApproved = true;
-
         } catch (TokenMgrError e) {
-            outputLog.append("\n--- ERRO LÉXICO ---\n");
-            outputLog.append(e.getMessage());
-
-            parent.getTextOutput().setText(outputLog.toString());
-            outputLog.setLength(0);
-            return;
+            lexicalLog.append(e.getMessage());
+            lexicalApproved = false;
         }
+
+        if(lexicalApproved) {
+            System.out.println("Nenhum erro lexico encontrado, seguindo analise sintatica...");
+        }else{
+            outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
+            outputLog.append(lexicalLog);
+        }
+
         Language2025x2 parser = null;
         if(lexicalApproved) {
             try {
                 parser = new Language2025x2(new StringReader(sourceCode));
                 parser.programa();
                 if (parser != null && parser.errosSintaticos.length() > 0) {
+                    outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
                     outputLog.append(sintaticBreakout(parser.errosSintaticos));
+                }else{
+                    System.out.println("Nenhum erro sintatico encontrado, seguindo analise semantica...");
+                    sintaticApproved = true;
                 }
             } catch (ParseException e) {
+                outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
                 outputLog.append("\n--- ERRO SINTÁTICO ---\n");
                 if (parser != null && parser.errosSintaticos.length() > 0) {
                     outputLog.append(parser.errosSintaticos);
                 }
             } catch (TokenMgrError e) {
+                outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
                 outputLog.append("\n--- ERRO LÉXICO (durante a análise sintática) ---\n");
                 outputLog.append(e.getMessage());
             }
         }
+
+        if(lexicalApproved && sintaticApproved) {
+            codigIn = parser.semantico.codigIn;
+            if (codigIn.size() > 0) {
+                semanticApproved = true;
+            }else{
+                outputLog.append("<h1 class='error'>Falha ao gerar o código intermediário</h1></br>");
+                semanticApproved = false;
+            }
+        }
+
+        if(lexicalApproved && sintaticApproved && semanticApproved) {
+            outputLog.append("<h1 class='success'>Programa compilado com sucesso</h1></br>");
+
+            ArrayList<String> linhas = new ArrayList<>(List.of("Número", "Operação", "Parâmetro"));
+
+            showMatrixFrame(codigIn, linhas,  "Código intermediário");
+        }
+
         outputLog.append(
                 "</body>" +
                         "</html>"
         );
-        System.out.println(outputLog.toString());
         parent.getTextOutput().setText(outputLog.toString());
+        System.out.println(outputLog.toString());
         outputLog.setLength(0);
     }
+
+    private void showMatrixFrame(ArrayList<ArrayList<String>> matrix,
+                                 ArrayList<String> colLabels,
+                                 String title) {
+
+        int n = matrix.size();
+        int m = colLabels.size();
+
+        Object[][] data = new Object[n][m];
+        for (int i = 0; i < n; i++) {
+            ArrayList<String> row = matrix.get(i);
+            for (int j = 0; j < m; j++) {
+                data[i][j] = row.get(j);
+            }
+        }
+
+        JTable table = new JTable(data, colLabels.toArray()) {
+        };
+        table.setEnabled(false);
+        table.setRowHeight(30);
+        table.setFont(new Font("Courier New", Font.PLAIN, 18));
+        JTableHeader header = table.getTableHeader();
+        header.setFont(new Font("Courier New", Font.BOLD, 18));
+
+        // ScrollPane com row header
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        // Frame
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.add(scrollPane);
+        frame.pack();
+        frame.setLocationRelativeTo(parent); // parent deve ser JFrame ou Component
+        frame.setVisible(true);
+    }
+
 
 }

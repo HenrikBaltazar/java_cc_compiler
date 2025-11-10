@@ -7,12 +7,13 @@ options {
 PARSER_BEGIN(Language2025x2)
 package org.example.JavaCC;
 
+import org.example.Actions.AnalisadorSemantico;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.HashSet;
 
 public class Language2025x2 {
-
+    public AnalisadorSemantico semantico = new AnalisadorSemantico();
     public StringBuilder errosSintaticos = new StringBuilder();
     private Token ultimoErroReportado = null;
     private boolean debug_recovery = true; // Mude para false para desativar as mensagens de debug
@@ -50,7 +51,7 @@ public class Language2025x2 {
         String encontrado = t.image;
         String esperados = criaListaEsperados(e);
         String erroMsg = String.format(
-            "<div class='log-entry'><span class='line-info'>Erro Sintático na linha %d, coluna %d:</span><br> Encontrado <span class='found'>@%s</span>, mas esperava <span class='expected'>@%s</span></div>\n",
+            "<div class='log-entry'><span class='line-info'>Erro Sintático na linha %d, coluna %d:</span><br> Encontrado <span class='found'>@%s</span> mas esperava <span class='expected'>@%s</span></div>\n",
             t.beginLine, t.beginColumn, encontrado.equals("@") || encontrado.equals("@ ") || encontrado.equals(" ") || encontrado.isEmpty() ? "espaco" : encontrado, esperados);
         errosSintaticos.append(erroMsg);
         //System.err.print(erroMsg);
@@ -168,14 +169,16 @@ TOKEN : {
     | <ERROR_INVALID_SYMBOL: ~[]>
 }
 
-void programa():{}
+void programa():{Token identificadorToken;}
 {
     try{
-        <BEGIN> [ <IDENTIFIER> ]
+
+        <BEGIN> [identificadorToken = <IDENTIFIER>  {semantico.programa1(identificadorToken);}]
         [ declaracao() ]
         <START>
-        listaDeComandos()
+        listaDeComandos() {semantico.programa2();}
         <END> <DOT>
+
     }catch(ParseException e){
         consumeUntil(programaRecSet, e, "programa"); //criar recovery set
     }
@@ -185,7 +188,7 @@ void programa():{}
 void declaracao():{}
 {
     try{
-        <DEFINE> listaDeclaracao()
+        <DEFINE> {semantico.declaracao0();} listaDeclaracao()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
 

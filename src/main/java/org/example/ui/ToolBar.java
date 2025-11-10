@@ -145,7 +145,7 @@ public class ToolBar extends JToolBar {
     }
 
     public void clearAll() {
-        parent.getTextOutput().setText("");
+        parent.getTextOutput().clear();
     }
 
     public void runCode() {

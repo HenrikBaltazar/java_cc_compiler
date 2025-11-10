@@ -1,4 +1,4 @@
-
+begin
 
 define
   
@@ -6,6 +6,6 @@ define
   ssssssssssssss a..
   read(x)
 start
-$
-123456789
+
+
 end.
