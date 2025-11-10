@@ -53,7 +53,9 @@ public class AnalisadorSemantico {
     }
 
 
+    public void declaracao1(){
 
+    }
 
 
 }

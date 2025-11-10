@@ -138,27 +138,42 @@ public class Build {
         );
 
 
-        int start = report.indexOf("<span class='expected'>");
-        String regex = "<div class='log-entry'>.*?palavra reservada:.*?</div>";
-        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(report.toString());
+        int divSearchIndex = 0;
+
         for (Dicionario d : dicionario) {
             int idx = report.indexOf(d.recebido);
             while (idx != -1) {
-                if (RESERVED_WORDS.contains(d.recebido.replace("@","")) && !report.toString().contains("palavra reservada:")) {
-                    if (start != -1) {
-                        start += "<span class='expected'>".length();
-                        report.insert(start, "palavra reservada: ");
+
+                // Substituição do dicionário
+                report.replace(idx, idx + d.recebido.length(), d.substituto);
+
+                // Verifica se é uma palavra reservada e se ainda não foi adicionada dentro da div
+                if (RESERVED_WORDS.contains(d.recebido.replace("@", ""))) {
+                    // Procura o div que contém esta ocorrência
+                    int divStart = report.lastIndexOf("<div class='log-entry'>", idx);
+                    int divEnd = report.indexOf("</div>", idx);
+                    if (divStart != -1 && divEnd != -1) {
+                        String divContent = report.substring(divStart, divEnd);
+                        if (!divContent.contains("palavra reservada:")) {
+                            // Inserir ": " após a primeira ocorrência dentro da div
+                            int spanStart = report.indexOf("<span class='expected'>", divStart);
+                            if (spanStart != -1 && spanStart < divEnd) {
+                                spanStart += "<span class='expected'>".length();
+                                report.insert(spanStart, "palavra reservada: ");
+                                divEnd += "palavra reservada: ".length(); // ajusta o final da div
+                            }
+                        }
                     }
                 }
-                report.replace(idx, idx + d.recebido.length(), d.substituto);
+
                 idx = report.indexOf(d.recebido, idx + d.substituto.length());
             }
         }
 
+// Troca a última vírgula por " ou"
         int lastComma = report.lastIndexOf(",");
         if (lastComma != -1) {
-            report = report.replace(lastComma, lastComma + 1, " ou");
+            report.replace(lastComma, lastComma + 1, " ou");
         }
 
         return report;
