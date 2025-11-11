@@ -67,6 +67,11 @@ public class AnalisadorSemantico {
         return linhas;
     }
 
+    private ArrayList<String> linha(int ponteiro, String inst, String value){
+        ArrayList<String> linhas = new ArrayList<>(List.of(String.valueOf(ponteiro), inst,value));
+        return linhas;
+    }
+
     public void programa2() // #P2
     {
         codigIn.add(linha(ponteiro, "STP", 0));
@@ -87,6 +92,7 @@ public class AnalisadorSemantico {
         String nome = id.image;
 
         if (tabela.lookup(nome) != null) {
+            System.out.println(nome);
             erroSemantico(id,"identificador "+found(id)+" já declarado");
             return;
         }
@@ -157,12 +163,12 @@ public class AnalisadorSemantico {
                 codigIn.add(linha(ponteiro, "STR", listaBasesDaLinha.get(k)));
                 ponteiro++;
             }
-            houveInitLinha = false;
-            primeiroBaseInit = 1;
-            listaDeIdentificadoresDaLinha.clear();
-            listaBasesDaLinha.clear();
-            VP = 0;
         }
+        houveInitLinha = false;
+        primeiroBaseInit = 1;
+        listaDeIdentificadoresDaLinha.clear();
+        listaBasesDaLinha.clear();
+        VP = 0;
     }
 
     public void inicializaVet(Token brace) { // #IV
@@ -302,6 +308,7 @@ public class AnalisadorSemantico {
     }
 
     public void expressao1(Token id){ // #E1
+        System.out.println(tabela);
         String nome = id.image;
         ExpAux = tabela.lookup(nome);
 
@@ -332,11 +339,13 @@ public class AnalisadorSemantico {
 
 
     public void atribuicao1(Token id){ //#A1
+        System.out.println("ATRIBUICAO ");
         String nome = id.image;
         if (tabela.lookup(nome) == null) {
             erroSemantico(id,"identificador "+found(id)+" não foi declarado");
             return;
         }
+
         AtrAux = tabela.lookup(nome);
         temIndice = false;
     }
@@ -346,18 +355,18 @@ public class AnalisadorSemantico {
     }
 
     public void atribuicao2(Token id){ //#A2
-        if(AtrAux.tam == 0 && temIndice){
+        if(AtrAux != null && AtrAux.tam == 0 && temIndice){
             erroSemantico(id,"identificador "+found(id)+" é escalar e "+expected("não deve possuir índice"));
         }
 
-        if(AtrAux.tam > 0 && !temIndice){
+        if(AtrAux != null &&AtrAux.tam > 0 && !temIndice){
             erroSemantico(id,"identificador "+found(id)+" é vetor "+expected("mas não possui índice"));
         }
 
     }
 
     public void atribuicao3(){ //#A3
-        if(AtrAux.tam == 0 ){
+        if(AtrAux != null &&AtrAux.tam == 0 ){
             codigIn.add(linha(ponteiro, "STR", VT+1));
             ponteiro++;
             return;
@@ -403,7 +412,7 @@ public class AnalisadorSemantico {
     }
 
     public void show3(){ // #S3
-        if(ShoAux.tam == 0 ) {
+        if(ShoAux != null && ShoAux.tam == 0 ) {
             codigIn.add(linha(ponteiro, "LDV", VT+1)); //
             ponteiro++;
 
@@ -443,7 +452,8 @@ public class AnalisadorSemantico {
     }
 
     public void saidaConstLiteral(Token s){ //#K3
-        Integer valor = Integer.parseInt(s.image);
+        //Integer valor = Integer.parseInt(s.image);
+        String valor = s.image;
 
         codigIn.add(linha(ponteiro, "LDR", valor)); //
         ponteiro++;
