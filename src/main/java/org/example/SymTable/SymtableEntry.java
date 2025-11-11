@@ -17,5 +17,6 @@ public class SymtableEntry {
         this.iden = iden;
         this.cat = cat;
         this.base = base;
+        this.tam = 0;
     }
 }

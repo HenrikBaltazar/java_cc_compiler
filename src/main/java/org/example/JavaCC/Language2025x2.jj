@@ -198,7 +198,7 @@ void declaracao():{}
 void listaDeclaracao():{}
 {
 
-   (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON> {semantico.declaracao6();}/*COLOCA D6 AQUI WEEE WOO WEE WOO TODO: SHREK GIGANTE*/)+
+   (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON>{semantico.declaracao6();}/*COLOCA D6 AQUI WEEE WOO WEE WOO TODO: SHREK GIGANTE*/)+
    /*⢀⡴⠑⡄⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
    ⠸⡇⠀⠿⡀⠀⠀⠀⣀⡴⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠑⢄⣠⠾⠁⣀⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀
@@ -209,7 +209,7 @@ void listaDeclaracao():{}
    ⠀⣾⣷⣶⠇⠀⠀⣤⣄⣀⡀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
    ⠀⠉⠈⠉⠀⠀⢦⡈⢻⣿⣿⣿⣶⣶⣶⣶⣤⣽⡹⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠀⠀⠀⠉⠲⣽⡻⢿⣿⣿⣿⣿⣿⣿⣷⣜⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
-   ⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣶⣮⣭⣽⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀ 
+   ⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣶⣮⣭⣽⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠀⠀⣀⣀⣈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -245,7 +245,7 @@ void constants():{Token constant;}
 void constantsDeclare():{}
 {
     try{
-        constants() {semantico.inicializaEscalar();} constantsList()
+        constants()  constantsList()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -285,13 +285,30 @@ void constantsListVetor():{}
 void variosTipos():{Token valorVetorToken;}
 {
     try{ //era constants()
-        [ <ASSIGN> constantsDeclare() {semantico.escalar2();} | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} ]
+
+
+
+
+
+
+       {semantico.escalar2();} iniciaEscalar()  | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> {semantico.vetor2();} vectorDeclare()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
     }
 
 }
+
+void iniciaEscalar():{}
+{
+try{ //era constants()
+      [ <ASSIGN>  constantsDeclare() {semantico.inicializaEscalar();} ]
+    }catch(ParseException e){
+        consumeUntil(declaracaoRecSet, e, "declaracao");
+
+    }
+}
+
 
 void vectorDeclare():{Token brace;}
 {

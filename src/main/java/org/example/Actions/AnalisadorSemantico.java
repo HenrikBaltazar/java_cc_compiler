@@ -29,6 +29,7 @@ public class AnalisadorSemantico {
     public int inicioLoop;
     public SymtableEntry ExpAux,AtrAux,ShoAux;
     public int valAux = 0;
+    public int proximoEnderecoBase=1;
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -98,6 +99,7 @@ public class AnalisadorSemantico {
         }
 
         listaDeIdentificadoresDaLinha.add(nome);
+        System.out.println("Declaracao 1 colocou: "+nome);
     }
 
     public void tipo(Token tipoToken){ // #T
@@ -134,8 +136,17 @@ public class AnalisadorSemantico {
         }
     }
 
+    public void inicializaEscalar(){ // #IE
+        primeiroBaseInit = listaBasesDaLinha.getFirst();
+        codigIn.add(linha(ponteiro, "STR", primeiroBaseInit));
+        ponteiro++;
+        houveInitLinha = true;
+    }
+
     public void escalar2(){ // #E2
+        System.out.println("ESCALAR 2");
         for(String nome: listaDeIdentificadoresDaLinha){
+            System.out.println("Escalar 2 colocou: "+nome);
             int base = VT + 1;
             tabela.insert(nome, categoriaAtual, base);
             VT += 1;
@@ -157,7 +168,7 @@ public class AnalisadorSemantico {
         }
         ponteiro++;
         if(houveInitLinha){
-            for(int k = 2; k < listaBasesDaLinha.size(); k++){
+            for(int k = 1; k < listaBasesDaLinha.size()-1; k++){
                 codigIn.add(linha(ponteiro, "LDV", primeiroBaseInit));
                 ponteiro++;
                 codigIn.add(linha(ponteiro, "STR", listaBasesDaLinha.get(k)));
@@ -165,7 +176,7 @@ public class AnalisadorSemantico {
             }
         }
         houveInitLinha = false;
-        primeiroBaseInit = 1;
+        primeiroBaseInit = -1;
         listaDeIdentificadoresDaLinha.clear();
         listaBasesDaLinha.clear();
         VP = 0;
@@ -176,14 +187,14 @@ public class AnalisadorSemantico {
                 int baseV = baseDoUltimoVetor;
                 codigIn.add(linha(ponteiro, "STR", baseV));
                 ponteiro++;
-                for(int j = 2; j < tamanhoDoUltimoVetor; j++){
+                for(int j = 1; j < tamanhoDoUltimoVetor-1; j++){
                     codigIn.add(linha(ponteiro, "LDV", baseV));
                     ponteiro++;
                     codigIn.add(linha(ponteiro, "STR", baseV + (j-1)));
                     ponteiro++;
                 }
             }else if(valAux == tamanhoDoUltimoVetor){
-                for(int i = 0; i > tamanhoDoUltimoVetor; i++){
+                for(int i = 0; i < tamanhoDoUltimoVetor; i++){
                     codigIn.add(linha(ponteiro, "STR", baseDoUltimoVetor + i));
                     ponteiro++;
                 }
@@ -194,12 +205,7 @@ public class AnalisadorSemantico {
             valAux = 0;
     }
 
-    public void inicializaEscalar(){ // #IE
-        primeiroBaseInit = listaBasesDaLinha.getFirst();
-        codigIn.add(linha(ponteiro, "STR", primeiroBaseInit));
-        ponteiro++;
-        houveInitLinha = true;
-    }
+
 
     public void val(){ // #VAL
         valAux++;

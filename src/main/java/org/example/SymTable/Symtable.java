@@ -24,6 +24,7 @@ public class Symtable {
     }
 
     public void insert(String iden, int cat, int base){
+        System.out.println(iden);
         if(table.containsKey(iden)){
             System.err.println("Erro Semântico: Identificador '" + iden + "' já declarado.");
         }else {
