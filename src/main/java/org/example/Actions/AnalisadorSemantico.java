@@ -19,7 +19,7 @@ public class AnalisadorSemantico {
     public ArrayList<Integer> listaBasesDaLinha; // lista (na ordem) das bases correspondentes da linha corrente
     public int categoriaAtual; // 1/2/3/4 (num/real/text/flag)
     public int ponteiro; //contador de instruções, inicia em 1
-    public ArrayList<Integer> pilhaDeDesvios ; // endereços de JMF/JMP a resolver
+    public ArrayList<Integer> pilhaDeDesvios = new ArrayList<>(); // endereços de JMF/JMP a resolver
     public boolean temIndice; //marca se há índice após um identificador
     public int baseDoUltimoVetor;  //base do último vetor declarado na linha
     public int tamanhoDoUltimoVetor; //tamanho do último vetor declarado na linha
@@ -140,7 +140,7 @@ public class AnalisadorSemantico {
             tabela.insert(nome, categoriaAtual, base);
             VT += 1;
             VP += 1;
-            listaBasesDaLinha.add(base);
+            listaBasesDaLinha.add(VT + 1);
         }
     }
 
@@ -218,7 +218,7 @@ public class AnalisadorSemantico {
     }
 
     public void constanteLiteral(Token token){ //#C3
-        Integer valor = Integer.parseInt(token.image);
+        String valor = token.image;
         codigIn.add(linha(ponteiro, "LDS", valor));
         ponteiro++;
     }

@@ -240,7 +240,6 @@ semantico.constanteFalsa();
   final public void constantsDeclare() throws ParseException {
     try {
       constants();
-semantico.inicializaEscalar();
       constantsList();
     } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "declaracao");
@@ -294,29 +293,32 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
   final public void variosTipos() throws ParseException {Token valorVetorToken;
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case ASSIGN:
       case LBRACKET:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case ASSIGN:{
-          jj_consume_token(ASSIGN);
-          constantsDeclare();
-semantico.escalar2();
-          break;
-          }
-        case LBRACKET:{
-          jj_consume_token(LBRACKET);
-          valorVetorToken = jj_consume_token(NUM);
+        jj_consume_token(LBRACKET);
+        valorVetorToken = jj_consume_token(NUM);
 semantico.vetor1(valorVetorToken);
-          jj_consume_token(RBRACKET);
-          vectorDeclare();
+        jj_consume_token(RBRACKET);
+        vectorDeclare();
 semantico.vetor2();
-          break;
-          }
-        default:
-          jj_la1[8] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+        break;
         }
+      default:
+        jj_la1[8] = jj_gen;
+semantico.escalar2();
+        iniciaEscalar();
+      }
+    } catch (ParseException e) {
+consumeUntil(declaracaoRecSet, e, "declaracao");
+    }
+}
+
+  final public void iniciaEscalar() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case ASSIGN:{
+        jj_consume_token(ASSIGN);
+        constantsDeclare();
+semantico.inicializaEscalar();
         break;
         }
       default:
@@ -793,10 +795,10 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x0,0x100,0x0,0x0,0xf000,0xe600000,0x0,0x0,0x80000000,0x80000000,0x80000000,0x870800,0x870800,0x0,0xe000000,0x0,0x30000000,0x30000000,0x0,0x0,0x0,0x0,0x0,0xe600000,0x100000,};
+	   jj_la1_0 = new int[] {0x0,0x100,0x0,0x0,0xf000,0xe600000,0x0,0x0,0x0,0x80000000,0x80000000,0x870800,0x870800,0x0,0xe000000,0x0,0x30000000,0x30000000,0x0,0x0,0x0,0x0,0x0,0xe600000,0x100000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x800000,0x0,0x800000,0x2,0x0,0x0,0x2,0x2,0x20,0x20,0x0,0x0,0x0,0x2,0x800000,0x20,0xe0800,0xe0800,0x200600,0x200600,0x417000,0x417000,0x8000,0x900080,0x0,};
+	   jj_la1_1 = new int[] {0x800000,0x0,0x800000,0x2,0x0,0x0,0x2,0x2,0x20,0x0,0x0,0x0,0x0,0x2,0x800000,0x20,0xe0800,0xe0800,0x200600,0x200600,0x417000,0x417000,0x8000,0x900080,0x0,};
 	}
 	private static void jj_la1_init_2() {
 	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};

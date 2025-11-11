@@ -285,7 +285,7 @@ void constantsListVetor():{}
 void variosTipos():{Token valorVetorToken;}
 {
     try{ //era constants()
-        <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} | iniciaEscalar() {semantico.escalar2();}
+        <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} | {semantico.escalar2();} iniciaEscalar()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
