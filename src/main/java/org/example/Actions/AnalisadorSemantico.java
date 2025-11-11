@@ -157,7 +157,7 @@ public class AnalisadorSemantico {
         }
         ponteiro++;
         if(houveInitLinha){
-            for(int k = 2; k < listaBasesDaLinha.size(); k++){
+            for(int k = 1; k < listaBasesDaLinha.size()-1; k++){
                 codigIn.add(linha(ponteiro, "LDV", primeiroBaseInit));
                 ponteiro++;
                 codigIn.add(linha(ponteiro, "STR", listaBasesDaLinha.get(k)));
@@ -176,7 +176,7 @@ public class AnalisadorSemantico {
                 int baseV = baseDoUltimoVetor;
                 codigIn.add(linha(ponteiro, "STR", baseV));
                 ponteiro++;
-                for(int j = 2; j < tamanhoDoUltimoVetor; j++){
+                for(int j = 1; j < tamanhoDoUltimoVetor - 1; j++){
                     codigIn.add(linha(ponteiro, "LDV", baseV));
                     ponteiro++;
                     codigIn.add(linha(ponteiro, "STR", baseV + (j-1)));
@@ -368,17 +368,16 @@ public class AnalisadorSemantico {
 
     public void atribuicao3(){ //#A3
         if(AtrAux != null &&AtrAux.tam == 0 ){
-            codigIn.add(linha(ponteiro, "STR", VT+1));
+            codigIn.add(linha(ponteiro, "STR", AtrAux.base)); //era VT+1
             ponteiro++;
             return;
         }
-        codigIn.add(linha(ponteiro, "LDI", VT));
+        codigIn.add(linha(ponteiro, "LDI", AtrAux.base-1)); //era VT, talvez dê problema ainda!!!
         ponteiro++;
         codigIn.add(linha(ponteiro, "ADD", 0));
         ponteiro++;
         codigIn.add(linha(ponteiro, "STX", 0));
         ponteiro++;
-
     }
 
     public void read1(Token id){ //R1
