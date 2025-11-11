@@ -26,7 +26,7 @@ public class AnalisadorSemantico {
     public boolean houveInitLinha; //marca se houve inicialização comum na linha de escalares
     public int primeiroBaseInit; //base do primeiro identificador escalara inicializado na linha
     public StringBuilder erros;
-
+    public int inicioLoop;
     public SymtableEntry ExpAux,AtrAux,ShoAux;
     public int valAux = 0;
 
@@ -315,6 +315,7 @@ public class AnalisadorSemantico {
     }
 
     public void expressao2(){ //#E2
+        if(ExpAux == null){return;}
         if(!temIndice) {
             codigIn.add(linha(ponteiro, "LDV", ExpAux.base));
             ponteiro++;
@@ -388,7 +389,7 @@ public class AnalisadorSemantico {
             return;
         }
 
-        // verif
+        // TODO FAZER O SHEREK
 
     } //#R2
 
@@ -401,8 +402,24 @@ public class AnalisadorSemantico {
         temIndice = false;
     }
 
-    public void show3(Token id){ // #S3
-        
+    public void show3(){ // #S3
+        if(ShoAux.tam == 0 ) {
+            codigIn.add(linha(ponteiro, "LDV", VT+1)); //
+            ponteiro++;
+
+            codigIn.add(linha(ponteiro, "WRT", 0)); //
+            ponteiro++;
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDI", VT)); //
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "ADD", 0)); //
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "LDX", 0)); //
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "WRT", 0)); //
+        ponteiro++;
+        temIndice = false;
     }
 
     public void saidaConstInteira(Token k){ //#K1
@@ -442,6 +459,12 @@ public class AnalisadorSemantico {
 
         ponteiro++;
     }
+    /*
+    15    if condicao -> 15 JMF 0
+        then
+     27   else -> selec2 15 JMF 27
+        end
+     */
 
     public void selecaoF2() { //#F2
         // gerar instrução(ponteiro, JMF, 0);
@@ -462,6 +485,26 @@ public class AnalisadorSemantico {
 
 
     public void selecaoF3() { //#F3
+
+        int ultimoIndice = pilhaDeDesvios.size() - 1;
+        int enderecoPendente = pilhaDeDesvios.remove(ultimoIndice);
+
+        int indiceDaLista = enderecoPendente - 1;
+        ArrayList<String> instrucaoPendente = codigIn.get(indiceDaLista);
+
+        instrucaoPendente.set(2, String.valueOf(ponteiro));
+    }
+
+    public void loop1(){
+        inicioLoop = ponteiro;
+        codigIn.add(linha(ponteiro, "JMF", 0));
+        pilhaDeDesvios.add(ponteiro);
+        ponteiro++;
+    }
+
+    public void loop2(){
+        codigIn.add(linha(ponteiro, "JMP", inicioLoop));
+        ponteiro++;
 
         int ultimoIndice = pilhaDeDesvios.size() - 1;
         int enderecoPendente = pilhaDeDesvios.remove(ultimoIndice);

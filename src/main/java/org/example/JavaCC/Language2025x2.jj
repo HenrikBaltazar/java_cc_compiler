@@ -1,7 +1,7 @@
 options {
     IGNORE_CASE = true;
     STATIC = false;
-    DEBUG_LOOKAHEAD = true;
+    DEBUG_LOOKAHEAD = false;
 }
 
 PARSER_BEGIN(Language2025x2)
@@ -264,7 +264,7 @@ void constantsList():{}
 
 void variosTipos():{Token valorVetorToken;}
 {
-    try{
+    try{ //era constants()
         [ <ASSIGN> constants() {semantico.inicializaEscalar();semantico.escalar2();} | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} ]
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
@@ -325,12 +325,12 @@ void saida():{}
 
 void idOuConst():{Token id;}
 {
-        id=<IDENTIFIER> {semantico.show2(id);} vetor() listaIdOuConst() | constants() listaIdOuConst()
+        id=<IDENTIFIER> {semantico.show2(id);} vetor(){semantico.show3();} listaIdOuConst() | constants(){semantico.show3();} listaIdOuConst()
 }
 
 void listaIdOuConst():{Token id;}
 {
-        [ <COMMA> ( id=<IDENTIFIER>{semantico.show2(id);}vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
+        [ <COMMA> ( id=<IDENTIFIER>{semantico.show2(id);}vetor(){semantico.show3();} listaIdOuConst()  | constants(){semantico.show3();} listaIdOuConst() ) ]
 }
 
 void vetor():{}
@@ -390,8 +390,8 @@ void elemento(): {Token identToken; Token vetor;}
 void repeticao(): {}
 {
     try{
-        <LOOP> <WHILE> expressao()
-        listaDeComandos()
+        <LOOP> <WHILE> expressao() {semantico.loop1();}
+        listaDeComandos() {semantico.loop2();}
         <END> <SEMICOLON>
     }catch(ParseException e){
         consumeUntil(comandoRecSet, e, "lista de comandos");
@@ -402,9 +402,9 @@ void repeticao(): {}
 void selecao(): {}
 {
     try{
-        <IF> expressao() <THEN>
+        <IF> expressao() {semantico.selecaoF1();} <THEN>
         listaDeComandos()
-        ifelse()
+        ifelse() {semantico.selecaoF3();}
         <END> <SEMICOLON>
     }catch(ParseException e){
         consumeUntil(comandoRecSet, e, "lista de comandos");
@@ -414,7 +414,7 @@ void selecao(): {}
 
 void ifelse(): {} {
     try{
-        [ <ELSE> listaDeComandos() ]
+        [ <ELSE> {semantico.selecaoF2();} listaDeComandos() ]
     }catch(ParseException e){
         consumeUntil(comandoRecSet, e, "lista de comandos");
 

@@ -81,436 +81,368 @@ public class Language2025x2 implements Language2025x2Constants {
         }
     }
 
-  final public void programa() throws ParseException {
-    trace_call("programa");
+  final public void programa() throws ParseException {Token identificadorToken;
     try {
-Token identificadorToken;
-      try {
-        jj_consume_token(BEGIN);
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case IDENTIFIER:{
-          identificadorToken = jj_consume_token(IDENTIFIER);
+      jj_consume_token(BEGIN);
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case IDENTIFIER:{
+        identificadorToken = jj_consume_token(IDENTIFIER);
 semantico.programa1(identificadorToken);
-          break;
-          }
-        default:
-          jj_la1[0] = jj_gen;
-          ;
+        break;
         }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case DEFINE:{
-          declaracao();
-          break;
-          }
-        default:
-          jj_la1[1] = jj_gen;
-          ;
+      default:
+        jj_la1[0] = jj_gen;
+        ;
+      }
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case DEFINE:{
+        declaracao();
+        break;
         }
-        jj_consume_token(START);
-        listaDeComandos();
+      default:
+        jj_la1[1] = jj_gen;
+        ;
+      }
+      jj_consume_token(START);
+      listaDeComandos();
 semantico.programa2();
-        jj_consume_token(END);
-        jj_consume_token(DOT);
-      } catch (ParseException e) {
+      jj_consume_token(END);
+      jj_consume_token(DOT);
+    } catch (ParseException e) {
 consumeUntil(programaRecSet, e, "programa"); //criar recovery set
 
-      }
-    } finally {
-      trace_return("programa");
     }
 }
 
 // DECLARACAO DE VARIAVEIS
   final public void declaracao() throws ParseException {
-    trace_call("declaracao");
     try {
-
-      try {
-        jj_consume_token(DEFINE);
+      jj_consume_token(DEFINE);
 semantico.declaracao0();
-        listaDeclaracao();
-      } catch (ParseException e) {
+      listaDeclaracao();
+    } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "declaracao");
-      }
-    } finally {
-      trace_return("declaracao");
     }
 }
 
   final public void listaDeclaracao() throws ParseException {
-    trace_call("listaDeclaracao");
-    try {
-
-      label_1:
-      while (true) {
-        variosIdentificadores();
-        jj_consume_token(COLON);
-        tipos();
-        variosTipos();
-        jj_consume_token(SEMICOLON);
+    label_1:
+    while (true) {
+      variosIdentificadores();
+      jj_consume_token(COLON);
+      tipos();
+      variosTipos();
+      jj_consume_token(SEMICOLON);
 semantico.declaracao6();
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case IDENTIFIER:{
-          ;
-          break;
-          }
-        default:
-          jj_la1[2] = jj_gen;
-          break label_1;
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case IDENTIFIER:{
+        ;
+        break;
         }
+      default:
+        jj_la1[2] = jj_gen;
+        break label_1;
       }
-    } finally {
-      trace_return("listaDeclaracao");
     }
 }
 
-  final public void variosIdentificadores() throws ParseException {
-    trace_call("variosIdentificadores");
+  final public void variosIdentificadores() throws ParseException {Token identificadorToken;
     try {
-Token identificadorToken;
-      try {
-        identificadorToken = jj_consume_token(IDENTIFIER);
+      identificadorToken = jj_consume_token(IDENTIFIER);
 semantico.declaracao1(identificadorToken);
-        listaIdentificadores();
-      } catch (ParseException e) {
+      listaIdentificadores();
+    } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
-      }
-    } finally {
-      trace_return("variosIdentificadores");
     }
 }
 
-  final public void listaIdentificadores() throws ParseException {
-    trace_call("listaIdentificadores");
-    try {
-Token identificadorToken;
-      label_2:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case COMMA:{
-          ;
-          break;
-          }
-        default:
-          jj_la1[3] = jj_gen;
-          break label_2;
+  final public void listaIdentificadores() throws ParseException {Token identificadorToken;
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case COMMA:{
+        ;
+        break;
         }
-        jj_consume_token(COMMA);
-        identificadorToken = jj_consume_token(IDENTIFIER);
+      default:
+        jj_la1[3] = jj_gen;
+        break label_2;
+      }
+      jj_consume_token(COMMA);
+      identificadorToken = jj_consume_token(IDENTIFIER);
 semantico.declaracao1(identificadorToken);
-      }
-    } finally {
-      trace_return("listaIdentificadores");
     }
 }
 
-  final public void tipos() throws ParseException {
-    trace_call("tipos");
-    try {
-Token tipoToken;
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case TYPE_NUM:{
-        tipoToken = jj_consume_token(TYPE_NUM);
+  final public void tipos() throws ParseException {Token tipoToken;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case TYPE_NUM:{
+      tipoToken = jj_consume_token(TYPE_NUM);
 semantico.tipo(tipoToken);
-        break;
-        }
-      case TYPE_REAL:{
-        tipoToken = jj_consume_token(TYPE_REAL);
-semantico.tipo(tipoToken);
-        break;
-        }
-      case TYPE_TEXT:{
-        tipoToken = jj_consume_token(TYPE_TEXT);
-semantico.tipo(tipoToken);
-        break;
-        }
-      case TYPE_FLAG:{
-        tipoToken = jj_consume_token(TYPE_FLAG);
-semantico.tipo(tipoToken);
-        break;
-        }
-      default:
-        jj_la1[4] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      break;
       }
-    } finally {
-      trace_return("tipos");
+    case TYPE_REAL:{
+      tipoToken = jj_consume_token(TYPE_REAL);
+semantico.tipo(tipoToken);
+      break;
+      }
+    case TYPE_TEXT:{
+      tipoToken = jj_consume_token(TYPE_TEXT);
+semantico.tipo(tipoToken);
+      break;
+      }
+    case TYPE_FLAG:{
+      tipoToken = jj_consume_token(TYPE_FLAG);
+semantico.tipo(tipoToken);
+      break;
+      }
+    default:
+      jj_la1[4] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
 }
 
-  final public void constants() throws ParseException {
-    trace_call("constants");
-    try {
-Token constant;
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case NUM:{
-        constant = jj_consume_token(NUM);
+  final public void constants() throws ParseException {Token constant;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case NUM:{
+      constant = jj_consume_token(NUM);
 semantico.constanteInteira(constant);
-        break;
-        }
-      case REAL:{
-        constant = jj_consume_token(REAL);
-semantico.constanteReal(constant);
-        break;
-        }
-      case TEXT:{
-        constant = jj_consume_token(TEXT);
-semantico.constanteLiteral(constant);
-        break;
-        }
-      case TRUE:{
-        jj_consume_token(TRUE);
-semantico.constanteVerdadeira();
-        break;
-        }
-      case FALSE:{
-        jj_consume_token(FALSE);
-semantico.constanteFalsa();
-        break;
-        }
-      default:
-        jj_la1[5] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      break;
       }
-    } finally {
-      trace_return("constants");
+    case REAL:{
+      constant = jj_consume_token(REAL);
+semantico.constanteReal(constant);
+      break;
+      }
+    case TEXT:{
+      constant = jj_consume_token(TEXT);
+semantico.constanteLiteral(constant);
+      break;
+      }
+    case TRUE:{
+      jj_consume_token(TRUE);
+semantico.constanteVerdadeira();
+      break;
+      }
+    case FALSE:{
+      jj_consume_token(FALSE);
+semantico.constanteFalsa();
+      break;
+      }
+    default:
+      jj_la1[5] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
 }
 
   final public void constantsDeclare() throws ParseException {
-    trace_call("constantsDeclare");
     try {
-
-      try {
-        constants();
+      constants();
 semantico.val();
-        constantsList();
-      } catch (ParseException e) {
+      constantsList();
+    } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "declaracao");
-      }
-    } finally {
-      trace_return("constantsDeclare");
     }
 }
 
   final public void constantsList() throws ParseException {
-    trace_call("constantsList");
     try {
-
-      try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case COMMA:{
-          jj_consume_token(COMMA);
-          constantsDeclare();
-          break;
-          }
-        default:
-          jj_la1[6] = jj_gen;
-          ;
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case COMMA:{
+        jj_consume_token(COMMA);
+        constantsDeclare();
+        break;
         }
-      } catch (ParseException e) {
-consumeUntil(declaracaoRecSet, e, "declaracao");
+      default:
+        jj_la1[6] = jj_gen;
+        ;
       }
-    } finally {
-      trace_return("constantsList");
+    } catch (ParseException e) {
+consumeUntil(declaracaoRecSet, e, "declaracao");
     }
 }
 
-  final public void variosTipos() throws ParseException {
-    trace_call("variosTipos");
+  final public void variosTipos() throws ParseException {Token valorVetorToken;
     try {
-Token valorVetorToken;
-      try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case ASSIGN:
-        case LBRACKET:{
-          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case ASSIGN:{
-            jj_consume_token(ASSIGN);
-            constants();
-semantico.inicializaEscalar();semantico.escalar2();
-            break;
-            }
-          case LBRACKET:{
-            jj_consume_token(LBRACKET);
-            valorVetorToken = jj_consume_token(NUM);
-semantico.vetor1(valorVetorToken);
-            jj_consume_token(RBRACKET);
-            vectorDeclare();
-semantico.vetor2();
-            break;
-            }
-          default:
-            jj_la1[7] = jj_gen;
-            jj_consume_token(-1);
-            throw new ParseException();
-          }
-          break;
-          }
-        default:
-          jj_la1[8] = jj_gen;
-          ;
-        }
-      } catch (ParseException e) {
-consumeUntil(declaracaoRecSet, e, "declaracao");
-      }
-    } finally {
-      trace_return("variosTipos");
-    }
-}
-
-  final public void vectorDeclare() throws ParseException {
-    trace_call("vectorDeclare");
-    try {
-Token brace;
-      try {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case ASSIGN:
+      case LBRACKET:{
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case ASSIGN:{
           jj_consume_token(ASSIGN);
-          jj_consume_token(LBRACE);
           constantsDeclare();
-          brace = jj_consume_token(RBRACE);
-semantico.inicializaVet(brace);
+semantico.inicializaEscalar();semantico.escalar2();
+          break;
+          }
+        case LBRACKET:{
+          jj_consume_token(LBRACKET);
+          valorVetorToken = jj_consume_token(NUM);
+semantico.vetor1(valorVetorToken);
+          jj_consume_token(RBRACKET);
+          vectorDeclare();
+semantico.vetor2();
           break;
           }
         default:
-          jj_la1[9] = jj_gen;
-          ;
+          jj_la1[7] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      } catch (ParseException e) {
-consumeUntil(declaracaoRecSet, e, "declaracao");
+        break;
+        }
+      default:
+        jj_la1[8] = jj_gen;
+        ;
       }
-    } finally {
-      trace_return("vectorDeclare");
+    } catch (ParseException e) {
+consumeUntil(declaracaoRecSet, e, "declaracao");
+    }
+}
+
+  final public void vectorDeclare() throws ParseException {Token brace;
+    try {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case ASSIGN:{
+        jj_consume_token(ASSIGN);
+        jj_consume_token(LBRACE);
+        constantsDeclare();
+        brace = jj_consume_token(RBRACE);
+semantico.inicializaVet(brace);
+        break;
+        }
+      default:
+        jj_la1[9] = jj_gen;
+        ;
+      }
+    } catch (ParseException e) {
+consumeUntil(declaracaoRecSet, e, "declaracao");
     }
 }
 
 //Comandos
   final public 
 void listaDeComandos() throws ParseException {
-    trace_call("listaDeComandos");
     try {
-
-      try {
-        comando();
-      } catch (ParseException e) {
+      comando();
+    } catch (ParseException e) {
 consumeUntil(comandoRecSet, e, "lista de comandos");
-      }
-    } finally {
-      trace_return("listaDeComandos");
     }
 }
 
   final public void comando() throws ParseException {
-    trace_call("comando");
     try {
-
-      try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case SET:{
-          atribuicao();
-          break;
-          }
-        case READ:{
-          entrada();
-          break;
-          }
-        case SHOW:{
-          saida();
-          break;
-          }
-        case IF:{
-          selecao();
-          break;
-          }
-        case LOOP:{
-          repeticao();
-          break;
-          }
-        default:
-          jj_la1[10] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case SET:{
+        atribuicao();
+        break;
         }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case SET:
-        case READ:
-        case SHOW:
-        case IF:
-        case LOOP:{
-          listaDeComandos();
-          break;
-          }
-        default:
-          jj_la1[11] = jj_gen;
-          ;
+      case READ:{
+        entrada();
+        break;
         }
-      } catch (ParseException e) {
-consumeUntil(comandoRecSet, e, "lista de comandos");
+      case SHOW:{
+        saida();
+        break;
+        }
+      case IF:{
+        selecao();
+        break;
+        }
+      case LOOP:{
+        repeticao();
+        break;
+        }
+      default:
+        jj_la1[10] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    } finally {
-      trace_return("comando");
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case SET:
+      case READ:
+      case SHOW:
+      case IF:
+      case LOOP:{
+        listaDeComandos();
+        break;
+        }
+      default:
+        jj_la1[11] = jj_gen;
+        ;
+      }
+    } catch (ParseException e) {
+consumeUntil(comandoRecSet, e, "lista de comandos");
     }
 }
 
-  final public void atribuicao() throws ParseException {
-    trace_call("atribuicao");
-    try {
-Token id;
-      jj_consume_token(SET);
-      id = jj_consume_token(IDENTIFIER);
+  final public void atribuicao() throws ParseException {Token id;
+    jj_consume_token(SET);
+    id = jj_consume_token(IDENTIFIER);
 semantico.atribuicao1(id);
-      vetor();
+    vetor();
 semantico.atribuicao2(id);
-      jj_consume_token(ASSIGN);
-      expressao();
+    jj_consume_token(ASSIGN);
+    expressao();
 semantico.atribuicao3();
-      jj_consume_token(SEMICOLON);
-    } finally {
-      trace_return("atribuicao");
-    }
+    jj_consume_token(SEMICOLON);
 }
 
   final public void entrada() throws ParseException {
-    trace_call("entrada");
-    try {
-
-      jj_consume_token(READ);
-      jj_consume_token(LPAREN);
-      jj_consume_token(IDENTIFIER);
-      vetor();
-      jj_consume_token(RPAREN);
-      jj_consume_token(SEMICOLON);
-    } finally {
-      trace_return("entrada");
-    }
+    jj_consume_token(READ);
+    jj_consume_token(LPAREN);
+    jj_consume_token(IDENTIFIER);
+    vetor();
+    jj_consume_token(RPAREN);
+    jj_consume_token(SEMICOLON);
 }
 
   final public void saida() throws ParseException {
-    trace_call("saida");
-    try {
+    jj_consume_token(SHOW);
+    jj_consume_token(LPAREN);
+    idOuConst();
+    jj_consume_token(RPAREN);
+    jj_consume_token(SEMICOLON);
+}
 
-      jj_consume_token(SHOW);
-      jj_consume_token(LPAREN);
-      idOuConst();
-      jj_consume_token(RPAREN);
-      jj_consume_token(SEMICOLON);
-    } finally {
-      trace_return("saida");
+  final public void idOuConst() throws ParseException {Token id;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case IDENTIFIER:{
+      id = jj_consume_token(IDENTIFIER);
+semantico.show2(id);
+      vetor();
+semantico.show3();
+      listaIdOuConst();
+      break;
+      }
+    case TRUE:
+    case FALSE:
+    case TEXT:
+    case REAL:
+    case NUM:{
+      constants();
+semantico.show3();
+      listaIdOuConst();
+      break;
+      }
+    default:
+      jj_la1[12] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
 }
 
-  final public void idOuConst() throws ParseException {
-    trace_call("idOuConst");
-    try {
-Token id;
+  final public void listaIdOuConst() throws ParseException {Token id;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case COMMA:{
+      jj_consume_token(COMMA);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:{
         id = jj_consume_token(IDENTIFIER);
 semantico.show2(id);
         vetor();
+semantico.show3();
         listaIdOuConst();
         break;
         }
@@ -520,420 +452,311 @@ semantico.show2(id);
       case REAL:
       case NUM:{
         constants();
+semantico.show3();
         listaIdOuConst();
         break;
         }
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[13] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } finally {
-      trace_return("idOuConst");
-    }
-}
-
-  final public void listaIdOuConst() throws ParseException {
-    trace_call("listaIdOuConst");
-    try {
-Token id;
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case COMMA:{
-        jj_consume_token(COMMA);
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case IDENTIFIER:{
-          id = jj_consume_token(IDENTIFIER);
-semantico.show2(id);
-          vetor();
-          listaIdOuConst();
-          break;
-          }
-        case TRUE:
-        case FALSE:
-        case TEXT:
-        case REAL:
-        case NUM:{
-          constants();
-          listaIdOuConst();
-          break;
-          }
-        default:
-          jj_la1[13] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-        break;
-        }
-      default:
-        jj_la1[14] = jj_gen;
-        ;
+      break;
       }
-    } finally {
-      trace_return("listaIdOuConst");
+    default:
+      jj_la1[14] = jj_gen;
+      ;
     }
 }
 
   final public void vetor() throws ParseException {
-    trace_call("vetor");
-    try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case LBRACKET:{
-        jj_consume_token(LBRACKET);
-        expressao();
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case LBRACKET:{
+      jj_consume_token(LBRACKET);
+      expressao();
 semantico.i1();
-        jj_consume_token(RBRACKET);
-        break;
-        }
-      default:
-        jj_la1[15] = jj_gen;
-        ;
+      jj_consume_token(RBRACKET);
+      break;
       }
-    } finally {
-      trace_return("vetor");
+    default:
+      jj_la1[15] = jj_gen;
+      ;
     }
 }
 
   final public void expressao() throws ParseException {
-    trace_call("expressao");
-    try {
-
-      expAritOuLogi();
-      expressao1();
-    } finally {
-      trace_return("expressao");
-    }
+    expAritOuLogi();
+    expressao1();
 }
 
   final public void expressao1() throws ParseException {
-    trace_call("expressao1");
-    try {
-
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case EQUAL:
+    case NOT_EQUAL:
+    case SHIFT_RIGHT_ASSIGN:
+    case SHIFT_LEFT:
+    case SHIFT_RIGHT:
+    case SHIFT_LEFT_ASSIGN:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case EQUAL:
-      case NOT_EQUAL:
-      case SHIFT_RIGHT_ASSIGN:
-      case SHIFT_LEFT:
-      case SHIFT_RIGHT:
-      case SHIFT_LEFT_ASSIGN:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case EQUAL:{
-          jj_consume_token(EQUAL);
-          expAritOuLogi();
+      case EQUAL:{
+        jj_consume_token(EQUAL);
+        expAritOuLogi();
 semantico.rIgual();
-          break;
-          }
-        case NOT_EQUAL:{
-          jj_consume_token(NOT_EQUAL);
-          expAritOuLogi();
-semantico.rDiferente();
-          break;
-          }
-        case SHIFT_LEFT:{
-          jj_consume_token(SHIFT_LEFT);
-          expAritOuLogi();
-semantico.rMenor();
-          break;
-          }
-        case SHIFT_RIGHT:{
-          jj_consume_token(SHIFT_RIGHT);
-          expAritOuLogi();
-semantico.rMaior();
-          break;
-          }
-        case SHIFT_LEFT_ASSIGN:{
-          jj_consume_token(SHIFT_LEFT_ASSIGN);
-          expAritOuLogi();
-semantico.rMenorIgual();
-          break;
-          }
-        case SHIFT_RIGHT_ASSIGN:{
-          jj_consume_token(SHIFT_RIGHT_ASSIGN);
-          expAritOuLogi();
-semantico.rMaiorIgual();
-          break;
-          }
-        default:
-          jj_la1[16] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+        break;
         }
+      case NOT_EQUAL:{
+        jj_consume_token(NOT_EQUAL);
+        expAritOuLogi();
+semantico.rDiferente();
+        break;
+        }
+      case SHIFT_LEFT:{
+        jj_consume_token(SHIFT_LEFT);
+        expAritOuLogi();
+semantico.rMenor();
+        break;
+        }
+      case SHIFT_RIGHT:{
+        jj_consume_token(SHIFT_RIGHT);
+        expAritOuLogi();
+semantico.rMaior();
+        break;
+        }
+      case SHIFT_LEFT_ASSIGN:{
+        jj_consume_token(SHIFT_LEFT_ASSIGN);
+        expAritOuLogi();
+semantico.rMenorIgual();
+        break;
+        }
+      case SHIFT_RIGHT_ASSIGN:{
+        jj_consume_token(SHIFT_RIGHT_ASSIGN);
+        expAritOuLogi();
+semantico.rMaiorIgual();
         break;
         }
       default:
-        jj_la1[17] = jj_gen;
-        ;
+        jj_la1[16] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    } finally {
-      trace_return("expressao1");
+      break;
+      }
+    default:
+      jj_la1[17] = jj_gen;
+      ;
     }
 }
 
   final public void expAritOuLogi() throws ParseException {
-    trace_call("expAritOuLogi");
-    try {
-
-      termo2();
-      menorPrioridade();
-    } finally {
-      trace_return("expAritOuLogi");
-    }
+    termo2();
+    menorPrioridade();
 }
 
   final public void menorPrioridade() throws ParseException {
-    trace_call("menorPrioridade");
-    try {
-
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case PLUS:
+    case MINUS:
+    case PIPE:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case PLUS:
-      case MINUS:
-      case PIPE:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case PLUS:{
-          jj_consume_token(PLUS);
-          termo2();
+      case PLUS:{
+        jj_consume_token(PLUS);
+        termo2();
 semantico.rAdd();
-          menorPrioridade();
-          break;
-          }
-        case MINUS:{
-          jj_consume_token(MINUS);
-          termo2();
-semantico.rSub();
-          menorPrioridade();
-          break;
-          }
-        case PIPE:{
-          jj_consume_token(PIPE);
-          termo2();
-semantico.rOr();
-          menorPrioridade();
-          break;
-          }
-        default:
-          jj_la1[18] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+        menorPrioridade();
+        break;
         }
+      case MINUS:{
+        jj_consume_token(MINUS);
+        termo2();
+semantico.rSub();
+        menorPrioridade();
+        break;
+        }
+      case PIPE:{
+        jj_consume_token(PIPE);
+        termo2();
+semantico.rOr();
+        menorPrioridade();
         break;
         }
       default:
-        jj_la1[19] = jj_gen;
-        ;
+        jj_la1[18] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    } finally {
-      trace_return("menorPrioridade");
+      break;
+      }
+    default:
+      jj_la1[19] = jj_gen;
+      ;
     }
 }
 
   final public void termo2() throws ParseException {
-    trace_call("termo2");
-    try {
-
-      termo1();
-      mediaPrioridade();
-    } finally {
-      trace_return("termo2");
-    }
+    termo1();
+    mediaPrioridade();
 }
 
   final public void mediaPrioridade() throws ParseException {
-    trace_call("mediaPrioridade");
-    try {
-
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case STAR:
+    case SLASH:
+    case PERCENT:
+    case DOUBLE_PERCENT:
+    case AMPERSAND:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case STAR:
-      case SLASH:
-      case PERCENT:
-      case DOUBLE_PERCENT:
-      case AMPERSAND:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case STAR:{
-          jj_consume_token(STAR);
-          termo1();
+      case STAR:{
+        jj_consume_token(STAR);
+        termo1();
 semantico.rMul();
-          mediaPrioridade();
-          break;
-          }
-        case SLASH:{
-          jj_consume_token(SLASH);
-          termo1();
-semantico.rDiv();
-          mediaPrioridade();
-          break;
-          }
-        case PERCENT:{
-          jj_consume_token(PERCENT);
-          termo1();
-semantico.rMod();
-          mediaPrioridade();
-          break;
-          }
-        case DOUBLE_PERCENT:{
-          jj_consume_token(DOUBLE_PERCENT);
-          termo1();
-semantico.rRem();
-          mediaPrioridade();
-          break;
-          }
-        case AMPERSAND:{
-          jj_consume_token(AMPERSAND);
-          termo1();
-semantico.rAnd();
-          mediaPrioridade();
-          break;
-          }
-        default:
-          jj_la1[20] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+        mediaPrioridade();
+        break;
         }
+      case SLASH:{
+        jj_consume_token(SLASH);
+        termo1();
+semantico.rDiv();
+        mediaPrioridade();
+        break;
+        }
+      case PERCENT:{
+        jj_consume_token(PERCENT);
+        termo1();
+semantico.rMod();
+        mediaPrioridade();
+        break;
+        }
+      case DOUBLE_PERCENT:{
+        jj_consume_token(DOUBLE_PERCENT);
+        termo1();
+semantico.rRem();
+        mediaPrioridade();
+        break;
+        }
+      case AMPERSAND:{
+        jj_consume_token(AMPERSAND);
+        termo1();
+semantico.rAnd();
+        mediaPrioridade();
         break;
         }
       default:
-        jj_la1[21] = jj_gen;
-        ;
+        jj_la1[20] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    } finally {
-      trace_return("mediaPrioridade");
+      break;
+      }
+    default:
+      jj_la1[21] = jj_gen;
+      ;
     }
 }
 
   final public void termo1() throws ParseException {
-    trace_call("termo1");
-    try {
-
-      elemento();
-      maiorPrioridade();
-    } finally {
-      trace_return("termo1");
-    }
+    elemento();
+    maiorPrioridade();
 }
 
   final public void maiorPrioridade() throws ParseException {
-    trace_call("maiorPrioridade");
-    try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case POWER:{
-        jj_consume_token(POWER);
-        elemento();
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case POWER:{
+      jj_consume_token(POWER);
+      elemento();
 semantico.rPow();
-        maiorPrioridade();
-        break;
-        }
-      default:
-        jj_la1[22] = jj_gen;
-        ;
+      maiorPrioridade();
+      break;
       }
-    } finally {
-      trace_return("maiorPrioridade");
+    default:
+      jj_la1[22] = jj_gen;
+      ;
     }
 }
 
-  final public void elemento() throws ParseException {
-    trace_call("elemento");
-    try {
-Token identToken; Token vetor;
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case IDENTIFIER:{
-        identToken = jj_consume_token(IDENTIFIER);
+  final public void elemento() throws ParseException {Token identToken; Token vetor;
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case IDENTIFIER:{
+      identToken = jj_consume_token(IDENTIFIER);
 semantico.expressao1(identToken);
-        vetor();
+      vetor();
 semantico.expressao2();
-        break;
-        }
-      case TRUE:
-      case FALSE:
-      case TEXT:
-      case REAL:
-      case NUM:{
-        constants();
-        break;
-        }
-      case EXCLAMATION:{
-        jj_consume_token(EXCLAMATION);
-        jj_consume_token(LPAREN);
-        expressao();
-        jj_consume_token(RPAREN);
-semantico.rNot();
-        break;
-        }
-      case LPAREN:{
-        jj_consume_token(LPAREN);
-        expressao();
-        jj_consume_token(RPAREN);
-        break;
-        }
-      default:
-        jj_la1[23] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      break;
       }
-    } finally {
-      trace_return("elemento");
+    case TRUE:
+    case FALSE:
+    case TEXT:
+    case REAL:
+    case NUM:{
+      constants();
+      break;
+      }
+    case EXCLAMATION:{
+      jj_consume_token(EXCLAMATION);
+      jj_consume_token(LPAREN);
+      expressao();
+      jj_consume_token(RPAREN);
+semantico.rNot();
+      break;
+      }
+    case LPAREN:{
+      jj_consume_token(LPAREN);
+      expressao();
+      jj_consume_token(RPAREN);
+      break;
+      }
+    default:
+      jj_la1[23] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
 }
 
   final public void repeticao() throws ParseException {
-    trace_call("repeticao");
     try {
-
-      try {
-        jj_consume_token(LOOP);
-        jj_consume_token(WHILE);
-        expressao();
-        listaDeComandos();
-        jj_consume_token(END);
-        jj_consume_token(SEMICOLON);
-      } catch (ParseException e) {
+      jj_consume_token(LOOP);
+      jj_consume_token(WHILE);
+      expressao();
+semantico.loop1();
+      listaDeComandos();
+semantico.loop2();
+      jj_consume_token(END);
+      jj_consume_token(SEMICOLON);
+    } catch (ParseException e) {
 consumeUntil(comandoRecSet, e, "lista de comandos");
-      }
-    } finally {
-      trace_return("repeticao");
     }
 }
 
   final public void selecao() throws ParseException {
-    trace_call("selecao");
     try {
-
-      try {
-        jj_consume_token(IF);
-        expressao();
-        jj_consume_token(THEN);
-        listaDeComandos();
-        ifelse();
-        jj_consume_token(END);
-        jj_consume_token(SEMICOLON);
-      } catch (ParseException e) {
+      jj_consume_token(IF);
+      expressao();
+semantico.selecaoF1();
+      jj_consume_token(THEN);
+      listaDeComandos();
+      ifelse();
+semantico.selecaoF3();
+      jj_consume_token(END);
+      jj_consume_token(SEMICOLON);
+    } catch (ParseException e) {
 consumeUntil(comandoRecSet, e, "lista de comandos");
-      }
-    } finally {
-      trace_return("selecao");
     }
 }
 
   final public void ifelse() throws ParseException {
-    trace_call("ifelse");
     try {
-
-      try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case ELSE:{
-          jj_consume_token(ELSE);
-          listaDeComandos();
-          break;
-          }
-        default:
-          jj_la1[24] = jj_gen;
-          ;
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case ELSE:{
+        jj_consume_token(ELSE);
+semantico.selecaoF2();
+        listaDeComandos();
+        break;
         }
-      } catch (ParseException e) {
-consumeUntil(comandoRecSet, e, "lista de comandos");
+      default:
+        jj_la1[24] = jj_gen;
+        ;
       }
-    } finally {
-      trace_return("ifelse");
+    } catch (ParseException e) {
+consumeUntil(comandoRecSet, e, "lista de comandos");
     }
 }
 
@@ -965,9 +788,6 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
 	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
-  {
-      enable_tracing();
-  }
   /** Constructor with InputStream. */
   public Language2025x2(java.io.InputStream stream) {
 	  this(stream, null);
@@ -1049,7 +869,6 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
 	 jj_ntk = -1;
 	 if (token.kind == kind) {
 	   jj_gen++;
-	   trace_token(token, "");
 	   return token;
 	 }
 	 token = oldToken;
@@ -1064,7 +883,6 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
 	 else token = token.next = token_source.getNextToken();
 	 jj_ntk = -1;
 	 jj_gen++;
-	   trace_token(token, " (in getNextToken)");
 	 return token;
   }
 
@@ -1133,53 +951,12 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
 	 return trace_enabled;
   }
 
-  private int trace_indent = 0;
-/** Enable tracing. */
+  /** Enable tracing. */
   final public void enable_tracing() {
-	 trace_enabled = true;
   }
 
-/** Disable tracing. */
+  /** Disable tracing. */
   final public void disable_tracing() {
-	 trace_enabled = false;
-  }
-
-  protected void trace_call(String s) {
-	 if (trace_enabled) {
-	   for (int i = 0; i < trace_indent; i++) { System.out.print(" "); }
-	   System.out.println("Call:	" + s);
-	 }
-	 trace_indent = trace_indent + 2;
-  }
-
-  protected void trace_return(String s) {
-	 trace_indent = trace_indent - 2;
-	 if (trace_enabled) {
-	   for (int i = 0; i < trace_indent; i++) { System.out.print(" "); }
-	   System.out.println("Return: " + s);
-	 }
-  }
-
-  protected void trace_token(Token t, String where) {
-	 if (trace_enabled) {
-	   for (int i = 0; i < trace_indent; i++) { System.out.print(" "); }
-	   System.out.print("Consumed token: <" + tokenImage[t.kind]);
-	   if (t.kind != 0 && !tokenImage[t.kind].equals("\"" + t.image + "\"")) {
-		 System.out.print(": \"" + TokenMgrError.addEscapes(t.image) + "\"");
-	   }
-	   System.out.println(" at line " + t.beginLine + " column " + t.beginColumn + ">" + where);
-	 }
-  }
-
-  protected void trace_scan(Token t1, int t2) {
-	 if (trace_enabled) {
-	   for (int i = 0; i < trace_indent; i++) { System.out.print(" "); }
-	   System.out.print("Visited token: <" + tokenImage[t1.kind]);
-	   if (t1.kind != 0 && !tokenImage[t1.kind].equals("\"" + t1.image + "\"")) {
-		 System.out.print(": \"" + TokenMgrError.addEscapes(t1.image) + "\"");
-	   }
-	   System.out.println(" at line " + t1.beginLine + " column " + t1.beginColumn + ">; Expected token: <" + tokenImage[t2] + ">");
-	 }
   }
 
 }

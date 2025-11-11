@@ -365,7 +365,6 @@ public class Build {
                         "</html>"
         );
         parent.getTextOutput().setText(outputLog.toString());
-        System.out.println(outputLog.toString());
         outputLog.setLength(0);
     }
 
