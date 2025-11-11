@@ -240,6 +240,15 @@ public class Build {
                      color: #2980b9;
                      font-weight: bold;
                  }
+                 .identifier {
+                     color: #1a5276; /* tom azul escuro, harmônico com .expected */
+                     background-color: #eaf3fc; /* azul claro sutil */
+                     font-weight: 600;
+                     font-family: 'Consolas', 'Courier New', monospace;
+                     padding: 2px 6px;
+                     border-radius: 4px;
+                     border: 1px solid #d6e9f9;
+                 }
                 """
         );
         StringBuilder outputLog = new StringBuilder(
@@ -313,24 +322,33 @@ public class Build {
                 }
             } catch (ParseException e) {
                 outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
-                outputLog.append("\n--- ERRO SINTÁTICO ---\n");
                 if (parser != null && parser.errosSintaticos.length() > 0) {
                     outputLog.append(parser.errosSintaticos);
                 }
+                if (parser != null && parser.semantico.erros.length() > 0) {
+                    outputLog.append(parser.semantico.erros);
+                }
             } catch (TokenMgrError e) {
                 outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
-                outputLog.append("\n--- ERRO LÉXICO (durante a análise sintática) ---\n");
+                outputLog.append(parser.errosSintaticos);
                 outputLog.append(e.getMessage());
             }
         }
 
         if(lexicalApproved && sintaticApproved) {
-            codigIn = parser.semantico.codigIn;
-            if (codigIn.size() > 0) {
-                semanticApproved = true;
-            }else{
-                outputLog.append("<h1 class='error'>Falha ao gerar o código intermediário</h1></br>");
+            if (parser != null && parser.semantico.erros.length() > 0) {
+                outputLog.append("<h1 class='error'>Falha ao compilar</h1></br>");
+                outputLog.append(parser.semantico.erros);
                 semanticApproved = false;
+            }else{
+                System.out.println("Nenhum erro semantico encontrado, gerando codigo intermediario...");
+                codigIn = parser.semantico.codigIn;
+                if (codigIn.size() > 0) {
+                    semanticApproved = true;
+                }else{
+                    outputLog.append("<h1 class='error'>Falha ao gerar o código intermediário</h1></br>");
+                    semanticApproved = false;
+                }
             }
         }
 

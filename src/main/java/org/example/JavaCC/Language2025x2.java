@@ -36,7 +36,7 @@ public class Language2025x2 implements Language2025x2Constants {
         return String.join(", ", tokensEsperados);
     }
 
-    void reportaErro(ParseException e, String met) {
+    void reportaErroSintatico(ParseException e, String met) {
         Token t = e.currentToken.next;
         if (t == ultimoErroReportado) {
             return;
@@ -54,7 +54,7 @@ public class Language2025x2 implements Language2025x2Constants {
 
 
     void consumeUntil(RecoverySet g, ParseException e, String met) {
-        reportaErro(e, met); // Reporta o erro original
+        reportaErroSintatico(e, met); // Reporta o erro original
 
         if (debug_recovery) {
             System.out.println();
@@ -148,6 +148,7 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
         tipos();
         variosTipos();
         jj_consume_token(SEMICOLON);
+semantico.declaracao6();
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case IDENTIFIER:{
           ;
@@ -166,9 +167,10 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
   final public void variosIdentificadores() throws ParseException {
     trace_call("variosIdentificadores");
     try {
-
+Token identificadorToken;
       try {
-        jj_consume_token(IDENTIFIER);
+        identificadorToken = jj_consume_token(IDENTIFIER);
+semantico.declaracao1(identificadorToken);
         listaIdentificadores();
       } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
@@ -181,7 +183,7 @@ consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
   final public void listaIdentificadores() throws ParseException {
     trace_call("listaIdentificadores");
     try {
-
+Token identificadorToken;
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -194,7 +196,8 @@ consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
           break label_2;
         }
         jj_consume_token(COMMA);
-        jj_consume_token(IDENTIFIER);
+        identificadorToken = jj_consume_token(IDENTIFIER);
+semantico.declaracao1(identificadorToken);
       }
     } finally {
       trace_return("listaIdentificadores");
@@ -204,22 +207,26 @@ consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
   final public void tipos() throws ParseException {
     trace_call("tipos");
     try {
-
+Token tipoToken;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TYPE_NUM:{
-        jj_consume_token(TYPE_NUM);
+        tipoToken = jj_consume_token(TYPE_NUM);
+semantico.tipo(tipoToken);
         break;
         }
       case TYPE_REAL:{
-        jj_consume_token(TYPE_REAL);
+        tipoToken = jj_consume_token(TYPE_REAL);
+semantico.tipo(tipoToken);
         break;
         }
       case TYPE_TEXT:{
-        jj_consume_token(TYPE_TEXT);
+        tipoToken = jj_consume_token(TYPE_TEXT);
+semantico.tipo(tipoToken);
         break;
         }
       case TYPE_FLAG:{
-        jj_consume_token(TYPE_FLAG);
+        tipoToken = jj_consume_token(TYPE_FLAG);
+semantico.tipo(tipoToken);
         break;
         }
       default:
@@ -308,7 +315,7 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
   final public void variosTipos() throws ParseException {
     trace_call("variosTipos");
     try {
-
+Token valorVetorToken;
       try {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case ASSIGN:
@@ -317,13 +324,16 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
           case ASSIGN:{
             jj_consume_token(ASSIGN);
             constants();
+semantico.escalar2();
             break;
             }
           case LBRACKET:{
             jj_consume_token(LBRACKET);
-            jj_consume_token(NUM);
+            valorVetorToken = jj_consume_token(NUM);
+semantico.vetor1(valorVetorToken);
             jj_consume_token(RBRACKET);
             vectorDeclare();
+semantico.vetor2();
             break;
             }
           default:

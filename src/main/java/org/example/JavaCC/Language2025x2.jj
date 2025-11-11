@@ -41,7 +41,7 @@ public class Language2025x2 {
         return String.join(", ", tokensEsperados);
     }
 
-    void reportaErro(ParseException e, String met) {
+    void reportaErroSintatico(ParseException e, String met) {
         Token t = e.currentToken.next;
         if (t == ultimoErroReportado) {
             return;
@@ -59,7 +59,7 @@ public class Language2025x2 {
 
 
     void consumeUntil(RecoverySet g, ParseException e, String met) {
-        reportaErro(e, met); // Reporta o erro original
+        reportaErroSintatico(e, met); // Reporta o erro original
 
         if (debug_recovery) {
             System.out.println();
@@ -198,7 +198,7 @@ void declaracao():{}
 void listaDeclaracao():{}
 {
 
-   (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON> /*COLOCA D6 AQUI WEEE WOO WEE WOO TODO: SHREK GIGANTE*/)+
+   (variosIdentificadores() <COLON> tipos() variosTipos() <SEMICOLON> {semantico.declaracao6();}/*COLOCA D6 AQUI WEEE WOO WEE WOO TODO: SHREK GIGANTE*/)+
    /*⢀⡴⠑⡄⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
    ⠸⡇⠀⠿⡀⠀⠀⠀⣀⡴⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
    ⠀⠀⠀⠀⠑⢄⣠⠾⠁⣀⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀
@@ -217,24 +217,24 @@ void listaDeclaracao():{}
 
 }
 
-void variosIdentificadores():{}
+void variosIdentificadores(): {Token identificadorToken;}
 {
     try{
-        <IDENTIFIER> listaIdentificadores()
+        identificadorToken = <IDENTIFIER> {semantico.declaracao1(identificadorToken);} listaIdentificadores()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "lista de Identificadores");
 
     }
 }
 
-void listaIdentificadores():{}
+void listaIdentificadores():{Token identificadorToken;}
 {
-      (<COMMA> <IDENTIFIER>)*
+      (<COMMA> identificadorToken = <IDENTIFIER> {semantico.declaracao1(identificadorToken);})*
 }
 
-void tipos():{}
+void tipos():{Token tipoToken;}
 {
-    <TYPE_NUM> | <TYPE_REAL> | <TYPE_TEXT> | <TYPE_FLAG>
+   tipoToken = <TYPE_NUM> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_REAL> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_TEXT> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_FLAG> {semantico.tipo(tipoToken);}
 }
 
 void constants():{}
@@ -262,10 +262,10 @@ void constantsList():{}
     }
 }
 
-void variosTipos():{}
+void variosTipos():{Token valorVetorToken;}
 {
     try{
-        [ <ASSIGN> constants() | <LBRACKET> <NUM> <RBRACKET> vectorDeclare() ]
+        [ <ASSIGN> constants() {semantico.escalar2();} | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} ]
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
