@@ -183,7 +183,7 @@ public class AnalisadorSemantico {
                     ponteiro++;
                 }
             }else if(valAux == tamanhoDoUltimoVetor){
-                for(int i = 0; i > tamanhoDoUltimoVetor; i++){
+                for(int i = 0; i < tamanhoDoUltimoVetor; i++){
                     codigIn.add(linha(ponteiro, "STR", baseDoUltimoVetor + i));
                     ponteiro++;
                 }
@@ -264,7 +264,8 @@ public class AnalisadorSemantico {
         ponteiro++;
     }
     public void rSub(){ // #SUB
-        codigIn.add(linha(ponteiro, "ADD", 0));
+        codigIn.add(linha(ponteiro, "SUB", 0));
+        ponteiro++;
     }
 
     public void rOr(){
