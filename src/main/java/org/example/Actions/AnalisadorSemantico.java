@@ -3,6 +3,7 @@ package org.example.Actions;
 import org.example.JavaCC.Token;
 import org.example.JavaCC.TokenMgrError;
 import org.example.SymTable.Symtable;
+import org.example.SymTable.SymtableEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +20,15 @@ public class AnalisadorSemantico {
     public int categoriaAtual; // 1/2/3/4 (num/real/text/flag)
     public int ponteiro; //contador de instruções, inicia em 1
     //pilhaDeDesvios: endereços de JMF/JMP a resolver
-    //temIndice: marca se há índice após um identificador
+    public boolean temIndice; //marca se há índice após um identificador
     public int baseDoUltimoVetor;  //base do último vetor declarado na linha
     public int tamanhoDoUltimoVetor; //tamanho do último vetor declarado na linha
     public boolean houveInitLinha; //marca se houve inicialização comum na linha de escalares
     public int primeiroBaseInit; //base do primeiro identificador escalara inicializado na linha
     public StringBuilder erros;
+
+    public SymtableEntry aux;
+
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -161,12 +165,47 @@ public class AnalisadorSemantico {
         }
     }
 
-    public void inicializaVet() { // #IV — Inicialização de vetor com um único valor (replicação sem peephole):
+    public void inicializaVet(Token listaConstantesToken, Token primeiraConstanteToken,Token valorVetorToken) { // #IV
+        if(listaConstantesToken == null){
+            //— Inicialização de vetor com um único valor (replicação sem peephole):
+            /*
+            EXEMPLO:
+            define
+             v : num [5] = 3;
+            gera:
+            (1, ALI, 5)
+            (2, LDI, 3)
+            (3, STR, 1)
+            (4, LDV, 1)
+            (5, STR, 2)
+            ...
+            (7, STR, 5)
+            --
+            (1) Gerar a <expressão> desse valor (no topo).
+            (2) baseV ← baseDoUltimoVetor.
+            (3) gerar instrução(ponteiro, STR, baseV); ++ponteiro.
+            (4) para j de 2 até tamanhoDoUltimoVetor:
+                  gerar instrução(ponteiro, LDV, baseV); ++ponteiro.
+                  gerar instrução(ponteiro, STR, baseV + (j−1)); ++ponteiro.
+             */
+            return;
+        }
+        String listaConstante = primeiraConstanteToken.image + listaConstantesToken.image;
+        int qtdConstantes = listaConstante.split(",").length;
+        if(qtdConstantes+1 < Integer.parseInt(valorVetorToken.image)){
+            erroSemantico(primeiraConstanteToken,"Faltam indices a serem inicializados, esperam-se "+expected(valorVetorToken.image)+" constantes ");
+            return;
+        }
+        //• Caso lista completa (um valor por elemento): cada <valor> já empilha sua constante; emitir STR direto em #VAL (ver abaixo).
+
 
     }
 
-
     public void inicializaEscalar(){ // #IE
+
+    }
+
+    public void val(){ // #VAL
 
     }
 
@@ -198,5 +237,91 @@ public class AnalisadorSemantico {
         ponteiro++;
     }
 
+//EXPRESSAO
+    public void rIgual(){ // #R==
+        codigIn.add(linha(ponteiro, "EQL", 0));
+        ponteiro++;
+    }
+    public void rMenor(){ // #R<
+        codigIn.add(linha(ponteiro, "SMR", 0));
+        ponteiro++;
+    }
+    public void rMenorIgual(){ // #R<=
+        codigIn.add(linha(ponteiro, "SME", 0));
+        ponteiro++;
+    }
+    public void rDiferente(){ // #R!=
+        codigIn.add(linha(ponteiro, "DIF", 0));
+        ponteiro++;
+    }
+    public void rMaior(){ // #R>
+        codigIn.add(linha(ponteiro, "BGR", 0));
+        ponteiro++;
+    }
+    public void rMaiorIgual(){ // #R>=
+        codigIn.add(linha(ponteiro, "BGE", 0));
+        ponteiro++;
+    }
+
+    public void rAdd(){
+        codigIn.add(linha(ponteiro, "ADD", 0));
+        ponteiro++;
+    }
+    public void rSub(){ // #SUB
+        codigIn.add(linha(ponteiro, "ADD", 0));
+    }
+
+    public void rOr(){
+        codigIn.add(linha(ponteiro, "OR", 0));
+        ponteiro++;
+    }
+
+    public void rMul(){
+        codigIn.add(linha(ponteiro, "MUL", 0));
+        ponteiro++;
+    }
+
+    public void rDiv(){
+        codigIn.add(linha(ponteiro, "DIV", 0));
+        ponteiro++;
+    }
+
+    public void rMod(){
+        codigIn.add(linha(ponteiro, "MOD", 0));
+        ponteiro++;
+    }
+
+    public void rRem(){
+        codigIn.add(linha(ponteiro, "REM", 0));
+        ponteiro++;
+    }
+
+    public void rAnd(){
+        codigIn.add(linha(ponteiro, "AND", 0));
+        ponteiro++;
+    }
+
+    public void rPow(){
+        codigIn.add(linha(ponteiro, "POW", 0));
+        ponteiro++;
+    }
+
+    public void rNot(){
+        codigIn.add(linha(ponteiro, "NOT", 0));
+        ponteiro++;
+    }
+
+    public void expressao1(Token id){
+        String nome = id.image;
+        aux = tabela.lookup(nome);
+
+        if(aux == null){
+            erroSemantico(id, "identificador " + found(id) + " não declarado");
+            temIndice = false;
+            return;
+        }
+
+        temIndice = false; // 4. temIndice ← falso
+    }
 
 }

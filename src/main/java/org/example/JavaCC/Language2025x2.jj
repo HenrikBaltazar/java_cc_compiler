@@ -237,15 +237,15 @@ void tipos():{Token tipoToken;}
    tipoToken = <TYPE_NUM> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_REAL> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_TEXT> {semantico.tipo(tipoToken);}| tipoToken = <TYPE_FLAG> {semantico.tipo(tipoToken);}
 }
 
-void constants():{}
+void constants():{Token constant;}
 {
-    <NUM> | <REAL> | <TEXT> | <TRUE> | <FALSE>
+    constant = <NUM> {semantico.constanteInteira(constant);} | constant = <REAL> {semantico.constanteReal(constant);} | constant = <TEXT> {semantico.constanteLiteral(constant);} | <TRUE> {semantico.constanteVerdadeira();} | <FALSE> {semantico.constanteFalsa();}
 }
 
-void constantsDeclare():{}
+void constantsDeclare():{Token listaConstantesToken;}
 {
     try{
-        constants() constantsList()
+        constants() constantsList() //listaConstantesToken=constantsList() {semantico.inicializaVet(listaConstantesToken,constant,valorVetorToken);} //#IV
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -346,7 +346,7 @@ void expressao(): {}{
 
 void expressao1(): {}
 {
-           [ ( <EQUAL> | <NOT_EQUAL> | <SHIFT_LEFT> | <SHIFT_RIGHT> | <SHIFT_LEFT_ASSIGN> | <SHIFT_RIGHT_ASSIGN> ) expAritOuLogi() ]
+           [  <EQUAL> expAritOuLogi() {semantico.rIgual();} | <NOT_EQUAL> expAritOuLogi() {semantico.rDiferente();} | <SHIFT_LEFT> expAritOuLogi() {semantico.rMenor();} | <SHIFT_RIGHT> expAritOuLogi() {semantico.rMaior();} | <SHIFT_LEFT_ASSIGN> expAritOuLogi() {semantico.rMenorIgual();} | <SHIFT_RIGHT_ASSIGN> expAritOuLogi() {semantico.rMaiorIgual();} ]
 
 }
 
@@ -357,7 +357,7 @@ void expAritOuLogi(): {}
 
 void menorPrioridade(): {}
 {
-        [ ( <PLUS> | <MINUS> | <PIPE> ) termo2() menorPrioridade() ]
+        [ <PLUS> termo2() {semantico.rAdd();} menorPrioridade() | <MINUS> termo2() {semantico.rSub();} menorPrioridade() | <PIPE> termo2() {semantico.rOr();} menorPrioridade() ]
 }
 
 void termo2(): {}
@@ -367,7 +367,7 @@ void termo2(): {}
 
 void mediaPrioridade(): {}
 {
-        [ ( <STAR> | <SLASH> | <PERCENT> | <DOUBLE_PERCENT> | <AMPERSAND> ) termo1() mediaPrioridade() ]
+        [ <STAR> termo1() {semantico.rMul();} mediaPrioridade() | <SLASH> termo1() {semantico.rDiv();} mediaPrioridade() | <PERCENT> termo1() {semantico.rMod();} mediaPrioridade() | <DOUBLE_PERCENT> termo1() {semantico.rRem();} mediaPrioridade() | <AMPERSAND> termo1() {semantico.rAnd();} mediaPrioridade() ]
 }
 
 void termo1(): {}
@@ -377,13 +377,13 @@ void termo1(): {}
 }
 
 void maiorPrioridade(): {}{
-        [ <POWER> elemento() maiorPrioridade() ]
+        [ <POWER> elemento() {semantico.rPow();} maiorPrioridade() ]
 
 }
 
-void elemento(): {}
+void elemento(): {Token identToken;}
 {
-        (<IDENTIFIER> | constants() | [ <EXCLAMATION> ] <LPAREN> expressao() <RPAREN> )
+        identToken = <IDENTIFIER> {semantico.expressao1(identToken);} vetor() | constants() | <EXCLAMATION> <LPAREN> expressao() <RPAREN> {semantico.rNot();} | <LPAREN> expressao() <RPAREN>
 
 }
 
