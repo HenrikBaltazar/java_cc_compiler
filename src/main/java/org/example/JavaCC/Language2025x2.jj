@@ -242,10 +242,10 @@ void constants():{Token constant;}
     constant = <NUM> {semantico.constanteInteira(constant);} | constant = <REAL> {semantico.constanteReal(constant);} | constant = <TEXT> {semantico.constanteLiteral(constant);} | <TRUE> {semantico.constanteVerdadeira();} | <FALSE> {semantico.constanteFalsa();}
 }
 
-void constantsDeclare():{Token listaConstantesToken;}
+void constantsDeclare():{}
 {
     try{
-        constants() constantsList() //listaConstantesToken=constantsList() {semantico.inicializaVet(listaConstantesToken,constant,valorVetorToken);} //#IV
+        constants() {semantico.val();} constantsList()
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -255,7 +255,7 @@ void constantsDeclare():{Token listaConstantesToken;}
 void constantsList():{}
 {
     try{
-        [ <COMMA> constantsDeclare() ]
+        [  <COMMA> constantsDeclare() ]
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -265,7 +265,7 @@ void constantsList():{}
 void variosTipos():{Token valorVetorToken;}
 {
     try{
-        [ <ASSIGN> constants() {semantico.escalar2();} | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} ]
+        [ <ASSIGN> constants() {semantico.inicializaEscalar();semantico.escalar2();} | <LBRACKET> valorVetorToken = <NUM> {semantico.vetor1(valorVetorToken);} <RBRACKET> vectorDeclare() {semantico.vetor2();} ]
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -273,10 +273,10 @@ void variosTipos():{Token valorVetorToken;}
 
 }
 
-void vectorDeclare():{}
+void vectorDeclare():{Token brace;}
 {
     try{
-        [ <ASSIGN> <LBRACE> constantsDeclare() <RBRACE> ]
+        [ <ASSIGN> <LBRACE> constantsDeclare() brace=<RBRACE> {semantico.inicializaVet(brace);}]
     }catch(ParseException e){
         consumeUntil(declaracaoRecSet, e, "declaracao");
         
@@ -305,8 +305,8 @@ void comando():{}
     }
 }
 
-void atribuicao():{}{
-        <SET> <IDENTIFIER> vetor() <ASSIGN> expressao() <SEMICOLON>
+void atribuicao():{Token id;}{
+        <SET> id=<IDENTIFIER> {semantico.atribuicao1(id);} /*#A1*/ vetor() {semantico.atribuicao2(id);}/*#A2*/ <ASSIGN> expressao() {semantico.atribuicao3();}/*#A3*/ <SEMICOLON>
 
 }
 
@@ -323,19 +323,19 @@ void saida():{}
 
 }
 
-void idOuConst():{}
+void idOuConst():{Token id;}
 {
-        <IDENTIFIER> vetor() listaIdOuConst() | constants() listaIdOuConst()
+        id=<IDENTIFIER> {semantico.show2(id);} vetor() listaIdOuConst() | constants() listaIdOuConst()
 }
 
-void listaIdOuConst():{}
+void listaIdOuConst():{Token id;}
 {
-        [ <COMMA> ( <IDENTIFIER>vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
+        [ <COMMA> ( id=<IDENTIFIER>{semantico.show2(id);}vetor() listaIdOuConst() | constants() listaIdOuConst() ) ]
 }
 
 void vetor():{}
 {
-       [ <LBRACKET> expressao()<RBRACKET> ]
+       [ <LBRACKET> expressao() {semantico.i1();}<RBRACKET> ]
 
 }
 
@@ -381,9 +381,9 @@ void maiorPrioridade(): {}{
 
 }
 
-void elemento(): {Token identToken;}
+void elemento(): {Token identToken; Token vetor;}
 {
-        identToken = <IDENTIFIER> {semantico.expressao1(identToken);} vetor() | constants() | <EXCLAMATION> <LPAREN> expressao() <RPAREN> {semantico.rNot();} | <LPAREN> expressao() <RPAREN>
+        identToken = <IDENTIFIER> {semantico.expressao1(identToken);} vetor() {semantico.expressao2();} | constants() | <EXCLAMATION> <LPAREN> expressao() <RPAREN> {semantico.rNot();} | <LPAREN> expressao() <RPAREN>
 
 }
 

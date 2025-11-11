@@ -282,9 +282,10 @@ semantico.constanteFalsa();
   final public void constantsDeclare() throws ParseException {
     trace_call("constantsDeclare");
     try {
-Token listaConstantesToken;
+
       try {
         constants();
+semantico.val();
         constantsList();
       } catch (ParseException e) {
 consumeUntil(declaracaoRecSet, e, "declaracao");
@@ -329,7 +330,7 @@ Token valorVetorToken;
           case ASSIGN:{
             jj_consume_token(ASSIGN);
             constants();
-semantico.escalar2();
+semantico.inicializaEscalar();semantico.escalar2();
             break;
             }
           case LBRACKET:{
@@ -363,14 +364,15 @@ consumeUntil(declaracaoRecSet, e, "declaracao");
   final public void vectorDeclare() throws ParseException {
     trace_call("vectorDeclare");
     try {
-
+Token brace;
       try {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case ASSIGN:{
           jj_consume_token(ASSIGN);
           jj_consume_token(LBRACE);
           constantsDeclare();
-          jj_consume_token(RBRACE);
+          brace = jj_consume_token(RBRACE);
+semantico.inicializaVet(brace);
           break;
           }
         default:
@@ -456,12 +458,15 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
   final public void atribuicao() throws ParseException {
     trace_call("atribuicao");
     try {
-
+Token id;
       jj_consume_token(SET);
-      jj_consume_token(IDENTIFIER);
+      id = jj_consume_token(IDENTIFIER);
+semantico.atribuicao1(id);
       vetor();
+semantico.atribuicao2(id);
       jj_consume_token(ASSIGN);
       expressao();
+semantico.atribuicao3();
       jj_consume_token(SEMICOLON);
     } finally {
       trace_return("atribuicao");
@@ -500,10 +505,11 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
   final public void idOuConst() throws ParseException {
     trace_call("idOuConst");
     try {
-
+Token id;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:{
-        jj_consume_token(IDENTIFIER);
+        id = jj_consume_token(IDENTIFIER);
+semantico.show2(id);
         vetor();
         listaIdOuConst();
         break;
@@ -530,13 +536,14 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
   final public void listaIdOuConst() throws ParseException {
     trace_call("listaIdOuConst");
     try {
-
+Token id;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case COMMA:{
         jj_consume_token(COMMA);
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case IDENTIFIER:{
-          jj_consume_token(IDENTIFIER);
+          id = jj_consume_token(IDENTIFIER);
+semantico.show2(id);
           vetor();
           listaIdOuConst();
           break;
@@ -574,6 +581,7 @@ consumeUntil(comandoRecSet, e, "lista de comandos");
       case LBRACKET:{
         jj_consume_token(LBRACKET);
         expressao();
+semantico.i1();
         jj_consume_token(RBRACKET);
         break;
         }
@@ -826,12 +834,13 @@ semantico.rPow();
   final public void elemento() throws ParseException {
     trace_call("elemento");
     try {
-Token identToken;
+Token identToken; Token vetor;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:{
         identToken = jj_consume_token(IDENTIFIER);
 semantico.expressao1(identToken);
         vetor();
+semantico.expressao2();
         break;
         }
       case TRUE:

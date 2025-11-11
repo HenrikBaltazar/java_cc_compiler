@@ -19,7 +19,7 @@ public class AnalisadorSemantico {
     public ArrayList<Integer> listaBasesDaLinha; // lista (na ordem) das bases correspondentes da linha corrente
     public int categoriaAtual; // 1/2/3/4 (num/real/text/flag)
     public int ponteiro; //contador de instruções, inicia em 1
-    //pilhaDeDesvios: endereços de JMF/JMP a resolver
+    public ArrayList<Integer> pilhaDeDesvios ; // endereços de JMF/JMP a resolver
     public boolean temIndice; //marca se há índice após um identificador
     public int baseDoUltimoVetor;  //base do último vetor declarado na linha
     public int tamanhoDoUltimoVetor; //tamanho do último vetor declarado na linha
@@ -27,8 +27,8 @@ public class AnalisadorSemantico {
     public int primeiroBaseInit; //base do primeiro identificador escalara inicializado na linha
     public StringBuilder erros;
 
-    public SymtableEntry aux;
-
+    public SymtableEntry ExpAux,AtrAux,ShoAux;
+    public int valAux = 0;
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -165,48 +165,38 @@ public class AnalisadorSemantico {
         }
     }
 
-    public void inicializaVet(Token listaConstantesToken, Token primeiraConstanteToken,Token valorVetorToken) { // #IV
-        if(listaConstantesToken == null){
-            //— Inicialização de vetor com um único valor (replicação sem peephole):
-            /*
-            EXEMPLO:
-            define
-             v : num [5] = 3;
-            gera:
-            (1, ALI, 5)
-            (2, LDI, 3)
-            (3, STR, 1)
-            (4, LDV, 1)
-            (5, STR, 2)
-            ...
-            (7, STR, 5)
-            --
-            (1) Gerar a <expressão> desse valor (no topo).
-            (2) baseV ← baseDoUltimoVetor.
-            (3) gerar instrução(ponteiro, STR, baseV); ++ponteiro.
-            (4) para j de 2 até tamanhoDoUltimoVetor:
-                  gerar instrução(ponteiro, LDV, baseV); ++ponteiro.
-                  gerar instrução(ponteiro, STR, baseV + (j−1)); ++ponteiro.
-             */
-            return;
-        }
-        String listaConstante = primeiraConstanteToken.image + listaConstantesToken.image;
-        int qtdConstantes = listaConstante.split(",").length;
-        if(qtdConstantes+1 < Integer.parseInt(valorVetorToken.image)){
-            erroSemantico(primeiraConstanteToken,"Faltam indices a serem inicializados, esperam-se "+expected(valorVetorToken.image)+" constantes ");
-            return;
-        }
-        //• Caso lista completa (um valor por elemento): cada <valor> já empilha sua constante; emitir STR direto em #VAL (ver abaixo).
-
-
+    public void inicializaVet(Token brace) { // #IV
+            if(valAux == 1){
+                int baseV = baseDoUltimoVetor;
+                codigIn.add(linha(ponteiro, "STR", baseV));
+                ponteiro++;
+                for(int j = 2; j < tamanhoDoUltimoVetor; j++){
+                    codigIn.add(linha(ponteiro, "LDV", baseV));
+                    ponteiro++;
+                    codigIn.add(linha(ponteiro, "STR", baseV + (j-1)));
+                    ponteiro++;
+                }
+            }else if(valAux == tamanhoDoUltimoVetor){
+                for(int i = 0; i > tamanhoDoUltimoVetor; i++){
+                    codigIn.add(linha(ponteiro, "STR", baseDoUltimoVetor + i));
+                    ponteiro++;
+                }
+            }else{
+                //numero de variaveis diferente do tamanha do veto -> erro
+                erroSemantico(brace,"Numero de variaveis diferente do tamanho do vetor");
+            }
+            valAux = 0;
     }
 
     public void inicializaEscalar(){ // #IE
-
+        primeiroBaseInit = listaBasesDaLinha.getFirst();
+        codigIn.add(linha(ponteiro, "STR", primeiroBaseInit));
+        ponteiro++;
+        houveInitLinha = true;
     }
 
     public void val(){ // #VAL
-
+        valAux++;
     }
 
     public void constanteInteira(Token token){ //#C1
@@ -311,11 +301,11 @@ public class AnalisadorSemantico {
         ponteiro++;
     }
 
-    public void expressao1(Token id){
+    public void expressao1(Token id){ // #E1
         String nome = id.image;
-        aux = tabela.lookup(nome);
+        ExpAux = tabela.lookup(nome);
 
-        if(aux == null){
+        if(ExpAux == null){
             erroSemantico(id, "identificador " + found(id) + " não declarado");
             temIndice = false;
             return;
@@ -324,4 +314,161 @@ public class AnalisadorSemantico {
         temIndice = false; // 4. temIndice ← falso
     }
 
+    public void expressao2(){ //#E2
+        if(!temIndice) {
+            codigIn.add(linha(ponteiro, "LDV", ExpAux.base));
+            ponteiro++;
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDI", ExpAux.base - 1));
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "ADD", 0));
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "LDX", 0));
+        ponteiro++;
+    }
+
+
+
+    public void atribuicao1(Token id){ //#A1
+        String nome = id.image;
+        if (tabela.lookup(nome) == null) {
+            erroSemantico(id,"identificador "+found(id)+" não foi declarado");
+            return;
+        }
+        AtrAux = tabela.lookup(nome);
+        temIndice = false;
+    }
+
+    public void i1(){ //#I1
+        temIndice = true;
+    }
+
+    public void atribuicao2(Token id){ //#A2
+        if(AtrAux.tam == 0 && temIndice){
+            erroSemantico(id,"identificador "+found(id)+" é escalar e "+expected("não deve possuir índice"));
+        }
+
+        if(AtrAux.tam > 0 && !temIndice){
+            erroSemantico(id,"identificador "+found(id)+" é vetor "+expected("mas não possui índice"));
+        }
+
+    }
+
+    public void atribuicao3(){ //#A3
+        if(AtrAux.tam == 0 ){
+            codigIn.add(linha(ponteiro, "STR", VT+1));
+            ponteiro++;
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDI", VT));
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "ADD", 0));
+        ponteiro++;
+        codigIn.add(linha(ponteiro, "STX", 0));
+        ponteiro++;
+
+    }
+
+    public void read1(Token id){ //R1
+        String nome = id.image;
+
+        AtrAux = tabela.lookup(nome);
+        if(AtrAux == null){
+            erroSemantico(id, "identificador " + found(id) + " não foi declarado");
+            temIndice = false;
+            return;
+        }
+        temIndice = false;
+    } //#R1
+
+    public void read2(Token id){ //R1
+        if (AtrAux == null) { // SE FOR NULO O ATR JA REPORTOU ALI EM CIMA EM R1
+            temIndice = false;
+            return;
+        }
+
+        // verif
+
+    } //#R2
+
+    public void show2(Token id){ // #S2
+        if (tabela.lookup(id.image) == null) {
+            erroSemantico(id,"Identificador "+found(id)+" foi chamado "+expected("mas não foi declarado"));
+            return;
+        }
+        ShoAux = tabela.lookup(id.image);
+        temIndice = false;
+    }
+
+    public void show3(Token id){ // #S3
+        
+    }
+
+    public void saidaConstInteira(Token k){ //#K1
+        Integer valor = Integer.parseInt(k.image);
+
+        codigIn.add(linha(ponteiro, "LDI", valor)); //
+        ponteiro++;
+
+        codigIn.add(linha(ponteiro, "WRT", 0));
+        ponteiro++;
+    }
+
+    public void saidaConstReal(Token r){ //#K2
+        Integer valor = Integer.parseInt(r.image);
+
+        codigIn.add(linha(ponteiro, "LDR", valor)); //
+        ponteiro++;
+
+        codigIn.add(linha(ponteiro, "WRT", 0));
+        ponteiro++;
+    }
+
+    public void saidaConstLiteral(Token s){ //#K3
+        Integer valor = Integer.parseInt(s.image);
+
+        codigIn.add(linha(ponteiro, "LDR", valor)); //
+        ponteiro++;
+
+        codigIn.add(linha(ponteiro, "WRT", 0));
+        ponteiro++;
+    }
+
+    public void selecaoF1() { //#F1
+        codigIn.add(linha(ponteiro, "JMF", 0)); // 0 = placeholder
+
+        pilhaDeDesvios.add(ponteiro);
+
+        ponteiro++;
+    }
+
+    public void selecaoF2() { //#F2
+        // gerar instrução(ponteiro, JMF, 0);
+        codigIn.add(linha(ponteiro, "JMP", 0)); // 0 = placeholder
+
+        int enderecoJMP = ponteiro;
+        ponteiro++;
+
+        int ultimoIndiceJMF = pilhaDeDesvios.size() - 1;
+        int enderecoJMF = pilhaDeDesvios.remove(ultimoIndiceJMF);
+
+        int IndiceListaJMF = enderecoJMF - 1;
+        ArrayList<String> instrucaoJMF = codigIn.get(IndiceListaJMF);
+        instrucaoJMF.set(2, String.valueOf(ponteiro));
+
+        pilhaDeDesvios.add(enderecoJMP);
+    }
+
+
+    public void selecaoF3() { //#F3
+
+        int ultimoIndice = pilhaDeDesvios.size() - 1;
+        int enderecoPendente = pilhaDeDesvios.remove(ultimoIndice);
+
+        int indiceDaLista = enderecoPendente - 1;
+        ArrayList<String> instrucaoPendente = codigIn.get(indiceDaLista);
+
+        instrucaoPendente.set(2, String.valueOf(ponteiro));
+    }
 }
