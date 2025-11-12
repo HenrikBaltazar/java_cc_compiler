@@ -1,4 +1,4 @@
 begin
 start
-show(a);
+show("Hello World");
 end.

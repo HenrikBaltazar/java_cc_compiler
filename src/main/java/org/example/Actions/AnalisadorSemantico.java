@@ -145,7 +145,6 @@ public class AnalisadorSemantico {
     }
 
     public void declaracao6(){ // #D6
-        //modelo de geração de codigo codigIn.add(linha(ponteiro, "STP", 0))
         if(categoriaAtual == 1){
             codigIn.add(linha(ponteiro, "ALI", VP));
         }else if(categoriaAtual == 2){
@@ -156,16 +155,18 @@ public class AnalisadorSemantico {
             codigIn.add(linha(ponteiro, "ALB", VP));
         }
         ponteiro++;
+
         if(houveInitLinha){
-            for(int k = 1; k < listaBasesDaLinha.size()-1; k++){
+            for(int k = 1; k < listaBasesDaLinha.size(); k++){
                 codigIn.add(linha(ponteiro, "LDV", primeiroBaseInit));
                 ponteiro++;
                 codigIn.add(linha(ponteiro, "STR", listaBasesDaLinha.get(k)));
                 ponteiro++;
             }
         }
+
         houveInitLinha = false;
-        primeiroBaseInit = 1;
+        primeiroBaseInit = -1;
         listaDeIdentificadoresDaLinha.clear();
         listaBasesDaLinha.clear();
         VP = 0;
@@ -372,12 +373,14 @@ public class AnalisadorSemantico {
             ponteiro++;
             return;
         }
-        codigIn.add(linha(ponteiro, "LDI", AtrAux.base-1)); //era VT, talvez dê problema ainda!!!
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "ADD", 0));
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "STX", 0));
-        ponteiro++;
+        if(AtrAux != null) {
+            codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1)); //era VT, talvez dê problema ainda!!!
+            ponteiro++;
+            codigIn.add(linha(ponteiro, "ADD", 0));
+            ponteiro++;
+            codigIn.add(linha(ponteiro, "STX", 0));
+            ponteiro++;
+        }
     }
 
     public void read1(Token id){ //R1
