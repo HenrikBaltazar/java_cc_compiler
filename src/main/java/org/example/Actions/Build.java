@@ -355,9 +355,8 @@ public class Build {
         if(lexicalApproved && sintaticApproved && semanticApproved) {
             outputLog.append("<h1 class='success'>Programa compilado com sucesso</h1></br>");
 
-            ArrayList<String> linhas = new ArrayList<>(List.of("Número", "Operação", "Parâmetro"));
-
-            showMatrixFrame(codigIn, linhas,  "Código intermediário");
+            MaquinaVirtual vm = new MaquinaVirtual(parent,codigIn);
+            //vm.showcodigInFrame(); //LEGADO
         }
 
         outputLog.append(
@@ -368,40 +367,7 @@ public class Build {
         outputLog.setLength(0);
     }
 
-    private void showMatrixFrame(ArrayList<ArrayList<String>> matrix,
-                                 ArrayList<String> colLabels,
-                                 String title) {
 
-        int n = matrix.size();
-        int m = colLabels.size();
-
-        Object[][] data = new Object[n][m];
-        for (int i = 0; i < n; i++) {
-            ArrayList<String> row = matrix.get(i);
-            for (int j = 0; j < m; j++) {
-                data[i][j] = row.get(j);
-            }
-        }
-
-        JTable table = new JTable(data, colLabels.toArray()) {
-        };
-        table.setEnabled(false);
-        table.setRowHeight(30);
-        table.setFont(new Font("Courier New", Font.PLAIN, 18));
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Courier New", Font.BOLD, 18));
-
-        // ScrollPane com row header
-        JScrollPane scrollPane = new JScrollPane(table);
-
-        // Frame
-        JFrame frame = new JFrame(title);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.add(scrollPane);
-        frame.pack();
-        frame.setLocationRelativeTo(parent); // parent deve ser JFrame ou Component
-        frame.setVisible(true);
-    }
 
 
 }
