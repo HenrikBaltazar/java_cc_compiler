@@ -19,7 +19,7 @@ public class MaquinaVirtual {
     private JEditorPane textArea;
     private static final Font FONT_OUTPUT = new Font("Monospaced", Font.PLAIN, 20);
     private static final HashSet<String> iAritmetica = new HashSet<>(Set.of("ADD", "DIV", "MUL", "SUB"));
-    private static final HashSet<String> iMemoria = new HashSet<>(Set.of("ALB", "ALI", "ALR", "ALS", "LDB","LDI","LDR","LDS","LDV","STR"));
+    private static final HashSet<String> iMemoria = new HashSet<>(Set.of("ALB", "ALI", "ALR", "ALS", "LDB","LDI","LDR","LDS","LDV","STR", "LDX", "STX"));
     private static final HashSet<String> iLogica = new HashSet<>(Set.of("AND", "NOT", "OR"));
     private static final HashSet<String> iRelacional = new HashSet<>(Set.of("BGE", "BGR", "DIF", "EQL", "SME", "SMR"));
     private static final HashSet<String> iDesvio = new HashSet<>(Set.of("JMF", "JMP", "JMT", "STP"));
@@ -29,7 +29,7 @@ public class MaquinaVirtual {
     Integer ponteiro = 0;
     private final Semaphore sem = new Semaphore(0);
     private String userInput = "";
-    String history="Execucao iniciada...<br><br>";
+    String history="Execucao iniciada...<br>--<br>";
     String style= """
                 body {
                     background-color: #000000;
@@ -44,11 +44,11 @@ public class MaquinaVirtual {
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
-        //performVM();
+        initializeWindow();
+        new Thread(this::performVM).start();
     }
 
     private void performVM(){
-        initializeWindow();
         int n = codigIn.size();
         int m = 3;
 
@@ -70,11 +70,6 @@ public class MaquinaVirtual {
             }
 
         }
-
-
-        frame.pack();
-        frame.setLocationRelativeTo(parent);
-        frame.setVisible(true);
     }
 
     private void dados(ArrayList<String> instrucao) {
@@ -129,7 +124,7 @@ public class MaquinaVirtual {
     }
 
     private void relacional(ArrayList<String> instrucao) {
-        if(pilha.size()>0) {
+        if(pilha.size()>1) {
             if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
                 float a = Float.parseFloat(pilha.get(topo - 1));
                 float b = Float.parseFloat(pilha.get(topo));
@@ -173,7 +168,7 @@ public class MaquinaVirtual {
     }
 
     private void logica(ArrayList<String> instrucao) {
-        if(pilha.size()>0) {
+        if(pilha.size()>1) {
             if (detectarTipo(pilha.get(topo)) == 4 && detectarTipo(pilha.get(topo-1)) == 4) {
                 boolean a = Boolean.parseBoolean(pilha.get(topo - 1));
                 boolean b = Boolean.parseBoolean(pilha.get(topo));
@@ -209,17 +204,35 @@ public class MaquinaVirtual {
             pilha.add(instrucao.get(2));
             ponteiro++;
         }else if(instrucao.get(1).equals("STR")) {
-            if (pilha.size() <= Integer.parseInt(instrucao.get(2))) {
-                pilha.set(Integer.parseInt(instrucao.get(2)), pilha.get(topo));
+            if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
+                pilha.set(Integer.parseInt(instrucao.get(2))-1, pilha.get(topo));
                 topo--;
+                ponteiro++;
+            } else {
+                quit("Overflow! pilha["+pilha.size()+"] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+            }
+        }else if(instrucao.get(1).equals("LDV")){
+            if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
+                topo++;
+                pilha.add(pilha.get(Integer.parseInt(instrucao.get(2))));
+                ponteiro++;
+            } else {
+                quit("Overflow! pilha["+pilha.size()+"] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+            }
+        }else if(instrucao.get(1).equals("LDX")){
+            if (!pilha.isEmpty()) {
+                pilha.set(topo,String.valueOf(topo));
                 ponteiro++;
             } else {
                 quit("Overflow! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
-        }else if(instrucao.get(1).equals("LDV")){
-            if (pilha.size() <= Integer.parseInt(instrucao.get(2))) {
-                topo++;
-                pilha.add(pilha.get(Integer.parseInt(instrucao.get(2))));
+        }else if(instrucao.get(1).equals("STX")){
+            if(pilha.size()>1) {
+                int endereco = topo;
+                topo--;
+                String valor = pilha.get(topo);
+                pilha.set(endereco, valor);
+                topo--;
                 ponteiro++;
             } else {
                 quit("Overflow! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
@@ -247,33 +260,37 @@ public class MaquinaVirtual {
 
     private void aritmetica(ArrayList<String> instrucao) {
         if(topo>0){
-            int topoValue = Integer.parseInt(pilha.remove(topo--));
-            int topoMenosUm = Integer.parseInt(pilha.remove(topo--));
-            switch (instrucao.get(1)){
-                case "ADD":
-                    topo++;
-                    pilha.add(String.valueOf(topoMenosUm + topoValue));
-                    ponteiro++;
-                    break;
-                case "DIV":
-                    if(Integer.parseInt(pilha.get(topo)) == 0){
-                        quit("Divisão por zero! ["+instrucao.get(0)+","+instrucao.get(1)+","+instrucao.get(2)+"]");
+            if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
+                int topoValue = Integer.parseInt(pilha.get(topo-1));
+                int topoMenosUm = Integer.parseInt(pilha.get(topo-1));
+                switch (instrucao.get(1)) {
+                    case "ADD":
+                        topo++;
+                        pilha.add(String.valueOf(topoMenosUm + topoValue));
+                        ponteiro++;
                         break;
-                    }
-                    topo++;
-                    pilha.add(String.valueOf(topoMenosUm / topoValue));
-                    ponteiro++;
-                    break;
-                case "MUL":
-                    topo++;
-                    pilha.add(String.valueOf(topoMenosUm * topoValue));
-                    ponteiro++;
-                    break;
-                case "SUB":
-                    topo++;
-                    pilha.add(String.valueOf(topoMenosUm - topoValue));
-                    ponteiro++;
-                    break;
+                    case "DIV":
+                        if (Integer.parseInt(pilha.get(topo)) == 0) {
+                            quit("Divisão por zero! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+                            break;
+                        }
+                        topo++;
+                        pilha.add(String.valueOf(topoMenosUm / topoValue));
+                        ponteiro++;
+                        break;
+                    case "MUL":
+                        topo++;
+                        pilha.add(String.valueOf(topoMenosUm * topoValue));
+                        ponteiro++;
+                        break;
+                    case "SUB":
+                        topo++;
+                        pilha.add(String.valueOf(topoMenosUm - topoValue));
+                        ponteiro++;
+                        break;
+                }
+            }else{
+                quit("Operacao incorreta: tipo nao eh num ou real! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
         }else{
             quit("Overflow! ["+instrucao.get(0)+","+instrucao.get(1)+","+instrucao.get(2)+"]");
@@ -335,6 +352,9 @@ public class MaquinaVirtual {
         scrollPane.getViewport().setBackground(Color.BLACK);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         frame.add(scrollPane);
+        frame.pack();
+        frame.setLocationRelativeTo(parent);
+        frame.setVisible(true);
     }
 
     void updateOutput(String out){
@@ -373,13 +393,13 @@ public class MaquinaVirtual {
 
     void quit(String msg){
         textArea.setEditable(false);
-        updateOutput("Execução finalizada com mensagem: <b>" + msg + "</b>");
+        updateOutput("<br>--<br>Execução finalizada com mensagem: <b>" + msg + "</b>");
         return;
     }
 
     void quit(){
         textArea.setEditable(false);
-        updateOutput("Execução finalizada.</b>");
+        updateOutput("<br>--<br>Execução finalizada.</b>");
         return;
     }
 

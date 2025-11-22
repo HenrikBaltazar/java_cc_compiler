@@ -30,6 +30,7 @@ public class AnalisadorSemantico {
     public SymtableEntry ExpAux,AtrAux,ShoAux;
     public int valAux = 0;
     public int indiceEstatico = -1; // -1 indica que não é estático (é dinâmico)
+    public int inicioVetC, fimVetC; // Marcadores para o swap
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -140,6 +141,15 @@ public class AnalisadorSemantico {
             baseDoUltimoVetor = base;
             listaBasesDaLinha.add(base);
         }
+    }
+
+    public void inicioVetorAtribuicao() {
+        inicioVetC = codigIn.size();
+    }
+
+
+    public void fimVetorAtribuicao() {
+        fimVetC = codigIn.size();
     }
 
     public void escalar2(){ // #E2
@@ -392,34 +402,64 @@ public class AnalisadorSemantico {
     public void atribuicao3(){ //#A3
         if(AtrAux == null) return;
 
-        // Caso 1: Escalar Simples
+        // --- CASO 1: ESCALAR ---
         if(AtrAux.tam == 0 ){
             codigIn.add(linha(ponteiro, "STR", AtrAux.base));
             ponteiro++;
             return;
         }
 
-        // Caso 2: Vetor
-        if (indiceEstatico != -1) {
-            // --- OTIMIZAÇÃO (Saída Esperada) ---
-            // Calcula endereço final: Base + (Índice - 1)
-            int enderecoFinal = AtrAux.base + (indiceEstatico - 1);
+        // --- CASO 2: VETOR ---
+        // Precisamos garantir a ordem [Valor, Endereço] na pilha.
 
-            // Gera STR direto no endereço calculado!
+        // Se for índice estático (v[3]), não gerou código de vetor, então não precisa trocar.
+        // Apenas geramos o STR direto (Otimização que fizemos antes).
+        if (indiceEstatico != -1) {
+            int enderecoFinal = AtrAux.base + (indiceEstatico - 1);
             codigIn.add(linha(ponteiro, "STR", enderecoFinal));
             ponteiro++;
-
-            // Limpa para a próxima
             indiceEstatico = -1;
-        } else {
-            // --- CASO DINÂMICO (v[i]) ---
-            codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
-            ponteiro++;
-            codigIn.add(linha(ponteiro, "ADD", 0));
-            ponteiro++;
-            codigIn.add(linha(ponteiro, "STX", 0)); // Store Indexado
-            ponteiro++;
+            return;
         }
+
+        // Se for índice DINÂMICO (v[i+1]), o código do vetor já foi gerado ANTES da expressão.
+        // Precisamos TROCAR: Mover o bloco do vetor para DEPOIS da expressão.
+
+        // 1. Identificar os blocos
+        // Bloco Vetor: de inicioVetC até fimVetC
+        // Bloco Expressão: de fimVetC até o final atual
+
+        if (fimVetC > inicioVetC) { // Só faz se tiver código de vetor para mover
+            List<ArrayList<String>> blocoVetor = new ArrayList<>(codigIn.subList(inicioVetC, fimVetC));
+
+            // Remove o bloco do vetor da posição original
+            codigIn.subList(inicioVetC, fimVetC).clear();
+
+            // Adiciona o bloco do vetor no final (depois da expressão)
+            codigIn.addAll(blocoVetor);
+
+            // IMPORTANTE: Renumerar os ponteiros (instruções) que ficaram fora de ordem
+            // Começamos a renumeração a partir do ponto onde mexemos (inicioVetC)
+            for (int i = inicioVetC; i < codigIn.size(); i++) {
+                // O ponteiro correto é i + 1 (pois sua lista é base-0 e ponteiro é base-1)
+                codigIn.get(i).set(0, String.valueOf(i + 1));
+            }
+
+            // Atualiza o ponteiro global para o próximo
+            ponteiro = codigIn.size() + 1;
+        }
+
+        // Agora a pilha está [Valor, Índice]. Vamos calcular o endereço.
+        // Gera: LDI Base-1, ADD, STX
+
+        codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
+        ponteiro++;
+
+        codigIn.add(linha(ponteiro, "ADD", 0));
+        ponteiro++;
+
+        codigIn.add(linha(ponteiro, "STX", 0));
+        ponteiro++;
     }
 
     public void read1(Token id){ //R1

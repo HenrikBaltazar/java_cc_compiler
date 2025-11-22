@@ -334,8 +334,23 @@ void comando():{}
 }
 
 void atribuicao():{Token id;}{
-        <SET> id=<IDENTIFIER> {semantico.atribuicao1(id);} /*#A1*/ vetor() {semantico.atribuicao2(id);}/*#A2*/ <ASSIGN> expressao() {semantico.atribuicao3();}/*#A3*/ <SEMICOLON>
+    <SET> id=<IDENTIFIER> {semantico.atribuicao1(id);}
 
+    // MARCADOR 1: Início do código do vetor
+    { semantico.inicioVetorAtribuicao(); }
+
+    vetor()
+
+    // MARCADOR 2: Fim do código do vetor
+    { semantico.fimVetorAtribuicao(); }
+
+    {semantico.atribuicao2(id);}
+    <ASSIGN>
+    expressao()
+
+    // A MÁGICA: Troca a ordem e gera o STX
+    {semantico.atribuicao3();}
+    <SEMICOLON>
 }
 
 void entrada():{Token id;}
