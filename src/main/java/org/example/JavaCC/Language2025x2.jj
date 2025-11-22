@@ -338,11 +338,9 @@ void atribuicao():{Token id;}{
 
 }
 
-void entrada():{}
+void entrada():{Token id;}
 {
-
-        <READ> <LPAREN> <IDENTIFIER> vetor() <RPAREN> <SEMICOLON>
-
+        <READ> <LPAREN> id=<IDENTIFIER> {semantico.read1(id);} vetor() {semantico.read2(id);} <RPAREN> <SEMICOLON> // conferir R1 e R2
 }
 
 void saida():{}
@@ -366,10 +364,19 @@ void item():{Token id;}
     id = <IDENTIFIER> {semantico.show2(id);} vetor() {semantico.show3();} | id=<NUM> {semantico.saidaConstInteira(id);} | id=<REAL> {semantico.saidaConstReal(id);} | id=<TEXT> {semantico.saidaConstLiteral(id);}
 }
 
-void vetor():{}
+void vetor():{Token t;}
 {
-       [ <LBRACKET> expressao() {semantico.i1();}<RBRACKET> ]
-
+    [
+        <LBRACKET>
+        (
+            // CASO 1: OTIMIZAÇÃO (Índice Constante, ex: v[3])
+            t=<NUM> { semantico.vetorConstante(t); }
+            |
+            // CASO 2: GENÉRICO (Índice Variável, ex: v[i] ou v[3+1])
+            expressao() { semantico.i1(); }
+        )
+        <RBRACKET>
+    ]
 }
 
 void expressao(): {}{

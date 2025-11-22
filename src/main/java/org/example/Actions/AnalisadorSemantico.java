@@ -29,6 +29,7 @@ public class AnalisadorSemantico {
     public int inicioLoop;
     public SymtableEntry ExpAux,AtrAux,ShoAux;
     public int valAux = 0;
+    public int indiceEstatico = -1; // -1 indica que não é estático (é dinâmico)
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -111,6 +112,13 @@ public class AnalisadorSemantico {
         }else if(Objects.equals(tipo, "flag")){
             categoriaAtual = 4;
         }
+    }
+
+    public void vetorConstante(Token t) {
+        temIndice = true;
+        // Guarda o valor do índice para usar depois
+        indiceEstatico = Integer.parseInt(t.image);
+        // NÃO gera LDI. O cálculo será feito na hora do STR/LDV.
     }
 
     public void vetor1(Token valorVetorToken){ // #V1 8====D
@@ -325,17 +333,30 @@ public class AnalisadorSemantico {
 
     public void expressao2(){ //#E2
         if(ExpAux == null){return;}
+
+        // Se não tem índice (escalar simples)
         if(!temIndice) {
             codigIn.add(linha(ponteiro, "LDV", ExpAux.base));
             ponteiro++;
             return;
         }
-        codigIn.add(linha(ponteiro, "LDI", ExpAux.base - 1));
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "ADD", 0));
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "LDX", 0));
-        ponteiro++;
+
+        // Se tem índice...
+        if (indiceEstatico != -1) {
+            // --- OTIMIZAÇÃO ---
+            int enderecoFinal = ExpAux.base + (indiceEstatico - 1);
+            codigIn.add(linha(ponteiro, "LDV", enderecoFinal));
+            ponteiro++;
+            indiceEstatico = -1;
+        } else {
+            // --- CASO DINÂMICO ---
+            codigIn.add(linha(ponteiro, "LDI", ExpAux.base - 1));
+            ponteiro++;
+            codigIn.add(linha(ponteiro, "ADD", 0));
+            ponteiro++;
+            codigIn.add(linha(ponteiro, "LDX", 0));
+            ponteiro++;
+        }
     }
 
 
@@ -354,6 +375,7 @@ public class AnalisadorSemantico {
 
     public void i1(){ //#I1
         temIndice = true;
+        indiceEstatico = -1; // Indica que o índice está na pilha (dinâmico)
     }
 
     public void atribuicao2(Token id){ //#A2
@@ -368,17 +390,34 @@ public class AnalisadorSemantico {
     }
 
     public void atribuicao3(){ //#A3
-        if(AtrAux != null &&AtrAux.tam == 0 ){
-            codigIn.add(linha(ponteiro, "STR", AtrAux.base)); //era VT+1
+        if(AtrAux == null) return;
+
+        // Caso 1: Escalar Simples
+        if(AtrAux.tam == 0 ){
+            codigIn.add(linha(ponteiro, "STR", AtrAux.base));
             ponteiro++;
             return;
         }
-        if(AtrAux != null) {
-            codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1)); //era VT, talvez dê problema ainda!!!
+
+        // Caso 2: Vetor
+        if (indiceEstatico != -1) {
+            // --- OTIMIZAÇÃO (Saída Esperada) ---
+            // Calcula endereço final: Base + (Índice - 1)
+            int enderecoFinal = AtrAux.base + (indiceEstatico - 1);
+
+            // Gera STR direto no endereço calculado!
+            codigIn.add(linha(ponteiro, "STR", enderecoFinal));
+            ponteiro++;
+
+            // Limpa para a próxima
+            indiceEstatico = -1;
+        } else {
+            // --- CASO DINÂMICO (v[i]) ---
+            codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
             ponteiro++;
             codigIn.add(linha(ponteiro, "ADD", 0));
             ponteiro++;
-            codigIn.add(linha(ponteiro, "STX", 0));
+            codigIn.add(linha(ponteiro, "STX", 0)); // Store Indexado
             ponteiro++;
         }
     }
@@ -395,14 +434,51 @@ public class AnalisadorSemantico {
         temIndice = false;
     } //#R1
 
+    // TODO FAZER O SHEREK
     public void read2(Token id){ //R1
-        if (AtrAux == null) { // SE FOR NULO O ATR JA REPORTOU ALI EM CIMA EM R1
+        if (AtrAux == null) { // Se falahar em R1, AtxAux sera null e vai aborta
             temIndice = false;
             return;
         }
 
-        // TODO FAZER O SHEREK
+        if(AtrAux.tam == 0){ // se for igual a 0 indica que nao é vetor, váriavel simples
+            if(temIndice){
+                erroSemantico(id, "Identificador " + found(id) + " é escalar e não deve possuir índice.");
+            }else{ //gera codigo pro escalar
 
+                // le o valor do teclado e empilha
+                codigIn.add(linha(ponteiro, "LDI", AtrAux.cat)); // Passa a categoria do tipo pro REA validar a entrada
+                ponteiro++;
+
+                // armazena o valor do topo no endereço da variável
+                codigIn.add(linha(ponteiro, "STR", AtrAux.base));
+                ponteiro++;
+            }
+
+        }else if(AtrAux.tam > 0){ // se for maior que 0 indica que é um vetor
+            if(!temIndice){ //validadcao semantica o vetor precisa ter indice de maneira obrigatoria
+                erroSemantico(id, "Identificador " + found(id) + " é vetor e precisa de índice");
+            }else{
+                // Carrega o Endereço Base do Vetor (ajustado em -1)
+                codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
+                ponteiro++;
+
+                // calcula o Endereço Físico (Soma Base + Índice)
+                codigIn.add(linha(ponteiro, "ADD", 0));
+                ponteiro++;
+
+                // lê o Valor do Teclado (REA)
+                // Colocamos o valor lido NO TOPO, acima do endereço.
+                codigIn.add(linha(ponteiro, "REA", AtrAux.cat));
+                ponteiro++;
+
+                // AVISO PARA SUA VM: O Topo é o VALOR, o Sub-topo é o ENDEREÇO.
+                codigIn.add(linha(ponteiro, "STX", 0));
+                ponteiro++;
+            }
+        }
+
+        temIndice = false;
     } //#R2
 
     public void show2(Token id){ // #S2
@@ -415,22 +491,53 @@ public class AnalisadorSemantico {
     }
 
     public void show3(){ // #S3
-        if(ShoAux != null && ShoAux.tam == 0 ) {
-            codigIn.add(linha(ponteiro, "LDV", VT+1)); //
+        if (ShoAux == null) return;
+
+        // --- CASO 1: Escalar Simples (ex: show(x)) ---
+        if(ShoAux.tam == 0 ) {
+            // CORREÇÃO: Usa ShoAux.base em vez de VT+1
+            codigIn.add(linha(ponteiro, "LDV", ShoAux.base));
             ponteiro++;
 
-            codigIn.add(linha(ponteiro, "WRT", 0)); //
+            codigIn.add(linha(ponteiro, "WRT", 0));
             ponteiro++;
             return;
         }
-        codigIn.add(linha(ponteiro, "LDI", VT)); //
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "ADD", 0)); //
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "LDX", 0)); //
-        ponteiro++;
-        codigIn.add(linha(ponteiro, "WRT", 0)); //
-        ponteiro++;
+
+        // --- CASO 2: Vetor com Índice Estático (ex: show(v[3])) ---
+        if (indiceEstatico != -1) {
+            // OTIMIZAÇÃO: Calcula o endereço final em tempo de compilação
+            // Endereço = Base + (Indice - 1)
+            int enderecoFinal = ShoAux.base + (indiceEstatico - 1);
+
+            codigIn.add(linha(ponteiro, "LDV", enderecoFinal));
+            ponteiro++;
+
+            codigIn.add(linha(ponteiro, "WRT", 0));
+            ponteiro++;
+
+            // Reseta o índice para a próxima instrução
+            indiceEstatico = -1;
+
+        } else {
+            // --- CASO 3: Vetor Dinâmico (ex: show(v[i])) ---
+            // Se cair aqui, gera LDI + ADD + LDX
+
+            // CORREÇÃO: Usa ShoAux.base - 1 em vez de VT
+            codigIn.add(linha(ponteiro, "LDI", ShoAux.base - 1));
+            ponteiro++;
+
+            codigIn.add(linha(ponteiro, "ADD", 0));
+            ponteiro++;
+
+            codigIn.add(linha(ponteiro, "LDX", 0)); // LDX carrega o valor usando o endereço do topo
+            ponteiro++;
+
+            codigIn.add(linha(ponteiro, "WRT", 0));
+            ponteiro++;
+        }
+
+        // Limpeza padrão
         temIndice = false;
     }
 
@@ -458,7 +565,7 @@ public class AnalisadorSemantico {
         //Integer valor = Integer.parseInt(s.image);
         String valor = s.image;
 
-        codigIn.add(linha(ponteiro, "LDR", valor)); //
+        codigIn.add(linha(ponteiro, "LDS", valor)); //arruma aqui era LDR virou LDS (bonda 3)
         ponteiro++;
 
         codigIn.add(linha(ponteiro, "WRT", 0));
