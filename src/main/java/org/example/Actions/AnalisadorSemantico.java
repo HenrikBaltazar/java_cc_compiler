@@ -31,6 +31,7 @@ public class AnalisadorSemantico {
     public int valAux = 0;
     public int indiceEstatico = -1; // -1 indica que não é estático (é dinâmico)
     public int inicioVetC, fimVetC; // Marcadores para o swap
+    public int indiceInicioLinha; // Marca onde começa o código da linha atual
 
     public AnalisadorSemantico() {
         this.ponteiro = 1;
@@ -113,6 +114,7 @@ public class AnalisadorSemantico {
         }else if(Objects.equals(tipo, "flag")){
             categoriaAtual = 4;
         }
+        indiceInicioLinha = codigIn.size();
     }
 
     public void vetorConstante(Token t) {
@@ -163,17 +165,32 @@ public class AnalisadorSemantico {
     }
 
     public void declaracao6(){ // #D6
-        if(categoriaAtual == 1){
-            codigIn.add(linha(ponteiro, "ALI", VP));
-        }else if(categoriaAtual == 2){
-            codigIn.add(linha(ponteiro, "ALR", VP));
-        }else if(categoriaAtual == 3){
-            codigIn.add(linha(ponteiro, "ALS", VP));
-        }else if(categoriaAtual == 4){
-            codigIn.add(linha(ponteiro, "ALB", VP));
-        }
-        ponteiro++;
+        ArrayList<String> instrucaoAlloc = null;
 
+        // 1. Cria a instrução de alocação (sem adicionar na lista ainda)
+        if(categoriaAtual == 1){
+            instrucaoAlloc = linha(0, "ALI", VP); // Use 0 temporariamente no ponteiro
+        }else if(categoriaAtual == 2){
+            instrucaoAlloc = linha(0, "ALR", VP);
+        }else if(categoriaAtual == 3){
+            instrucaoAlloc = linha(0, "ALS", VP);
+        }else if(categoriaAtual == 4){
+            instrucaoAlloc = linha(0, "ALB", VP);
+        }
+
+        // 2. INSERE a instrução no início da sequência da linha (antes dos inits)
+        if (instrucaoAlloc != null) {
+            codigIn.add(indiceInicioLinha, instrucaoAlloc);
+
+            // 3. RENUMERA as instruções afetadas (do ponto de inserção até o fim)
+            for (int i = indiceInicioLinha; i < codigIn.size(); i++) {
+                // Ajusta o número da linha (coluna 0) para i + 1
+                codigIn.get(i).set(0, String.valueOf(i + 1));
+            }
+
+            // Atualiza o ponteiro global para refletir o novo tamanho
+            ponteiro = codigIn.size() + 1;
+        }
         if(houveInitLinha){
             for(int k = 1; k < listaBasesDaLinha.size(); k++){
                 codigIn.add(linha(ponteiro, "LDV", primeiroBaseInit));
@@ -475,46 +492,78 @@ public class AnalisadorSemantico {
     } //#R1
 
     // TODO FAZER O SHEREK
-    public void read2(Token id){ //R1
-        if (AtrAux == null) { // Se falahar em R1, AtxAux sera null e vai aborta
+    public void read2(Token id){
+        if (AtrAux == null) {
             temIndice = false;
             return;
         }
 
-        if(AtrAux.tam == 0){ // se for igual a 0 indica que nao é vetor, váriavel simples
+        // --- CASO 1: ESCALAR (read(x)) ---
+        if(AtrAux.tam == 0){
             if(temIndice){
                 erroSemantico(id, "Identificador " + found(id) + " é escalar e não deve possuir índice.");
-            }else{ //gera codigo pro escalar
-
-                // le o valor do teclado e empilha
-                codigIn.add(linha(ponteiro, "LDI", AtrAux.cat)); // Passa a categoria do tipo pro REA validar a entrada
+            } else {
+                // 1. Lê valor (Pilha: [Valor])
+                codigIn.add(linha(ponteiro, "REA", AtrAux.cat));
                 ponteiro++;
 
-                // armazena o valor do topo no endereço da variável
+                // 2. Salva na base
                 codigIn.add(linha(ponteiro, "STR", AtrAux.base));
                 ponteiro++;
             }
 
-        }else if(AtrAux.tam > 0){ // se for maior que 0 indica que é um vetor
-            if(!temIndice){ //validadcao semantica o vetor precisa ter indice de maneira obrigatoria
+            // --- CASO 2: VETOR (read(v...)) ---
+        } else if(AtrAux.tam > 0){
+            if(!temIndice){
                 erroSemantico(id, "Identificador " + found(id) + " é vetor e precisa de índice");
-            }else{
-                // Carrega o Endereço Base do Vetor (ajustado em -1)
-                codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
-                ponteiro++;
+            } else {
 
-                // calcula o Endereço Físico (Soma Base + Índice)
-                codigIn.add(linha(ponteiro, "ADD", 0));
-                ponteiro++;
+                // --- Otimização de Índice Estático (read(v[3])) ---
+                if (indiceEstatico != -1) {
+                    int enderecoFinal = AtrAux.base + (indiceEstatico - 1);
 
-                // lê o Valor do Teclado (REA)
-                // Colocamos o valor lido NO TOPO, acima do endereço.
-                codigIn.add(linha(ponteiro, "REA", AtrAux.cat));
-                ponteiro++;
+                    codigIn.add(linha(ponteiro, "REA", AtrAux.cat));
+                    ponteiro++;
 
-                // AVISO PARA SUA VM: O Topo é o VALOR, o Sub-topo é o ENDEREÇO.
-                codigIn.add(linha(ponteiro, "STX", 0));
-                ponteiro++;
+                    codigIn.add(linha(ponteiro, "STR", enderecoFinal));
+                    ponteiro++;
+
+                    indiceEstatico = -1; // Reset
+
+                } else {
+                    // --- VETOR DINÂMICO (read(v[i])) SEM STO ---
+                    // O código do índice já está no codigIn (entre inicioVetC e agora).
+                    // Precisamos colocar o REA *antes* dele para a pilha ficar [Valor, Endereço].
+
+                    // 1. Insere o REA na posição onde começou o vetor (inicioVetC)
+                    // Use ponteiro temporário 0, será corrigido abaixo
+                    codigIn.add(inicioVetC, linha(0, "REA", AtrAux.cat));
+
+                    // 2. Renumera tudo daqui para frente
+                    for (int i = inicioVetC; i < codigIn.size(); i++) {
+                        codigIn.get(i).set(0, String.valueOf(i + 1));
+                    }
+
+                    // Atualiza o ponteiro global (cresceu 1 instrução)
+                    ponteiro = codigIn.size() + 1;
+
+                    // Pilha virtual neste momento: [Valor, Indice]
+
+                    // 3. Calcula o Endereço (Base + Indice)
+                    // O LDI vai empilhar a Base SOBRE o Índice.
+                    // Pilha: [Valor, Indice, Base-1]
+                    codigIn.add(linha(ponteiro, "LDI", AtrAux.base - 1));
+                    ponteiro++;
+
+                    // O ADD soma os dois do topo (Indice + Base)
+                    // Pilha: [Valor, EnderecoFinal]  <-- A ORDEM PERFEITA PARA O STX!
+                    codigIn.add(linha(ponteiro, "ADD", 0));
+                    ponteiro++;
+
+                    // 4. Salva usando STX
+                    codigIn.add(linha(ponteiro, "STX", 0));
+                    ponteiro++;
+                }
             }
         }
 

@@ -355,7 +355,14 @@ void atribuicao():{Token id;}{
 
 void entrada():{Token id;}
 {
-        <READ> <LPAREN> id=<IDENTIFIER> {semantico.read1(id);} vetor() {semantico.read2(id);} <RPAREN> <SEMICOLON> // conferir R1 e R2
+   <READ> <LPAREN> id=<IDENTIFIER> {semantico.read1(id);}
+
+   // Adicione estes marcadores!
+   { semantico.inicioVetorAtribuicao(); }
+   vetor()
+   { semantico.fimVetorAtribuicao(); }
+
+   {semantico.read2(id);} <RPAREN> <SEMICOLON>
 }
 
 void saida():{}

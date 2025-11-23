@@ -44,7 +44,7 @@ public class MaquinaVirtual {
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
-        showcodigInFrame();
+        //showcodigInFrame();
         initializeWindow();
         new Thread(this::performVM).start();
     }
@@ -52,7 +52,6 @@ public class MaquinaVirtual {
     private void performVM(){
         int n = codigIn.size();
         int m = 3;
-
         for (int i = 0; i < n; i++) {
             ArrayList<String> row = codigIn.get(i);
             System.out.println( "["+row.get(0)+","+row.get(1)+","+row.get(2)+"]");
@@ -69,7 +68,6 @@ public class MaquinaVirtual {
             }else if (iDados.contains(row.get(1))) {
                 dados(row);
             }
-
         }
     }
 
@@ -100,19 +98,19 @@ public class MaquinaVirtual {
     private void desvio(ArrayList<String> instrucao) {
         switch (instrucao.get(1)){
             case "JMF":
-                if(pilha.get(topo).equalsIgnoreCase("false")){
-                    ponteiro = Integer.parseInt(instrucao.get(2));
+                if(pilha.remove(topo).equalsIgnoreCase("false")){
+                    ponteiro = Integer.parseInt(instrucao.get(2))-1;
                 }else{
                     ponteiro++;
                 }
                 topo--;
                 break;
             case "JMP":
-                ponteiro = Integer.parseInt(instrucao.get(2));
+                ponteiro = Integer.parseInt(instrucao.get(2))-1;
                 break;
             case "JMT":
-                if(pilha.get(topo).equalsIgnoreCase("true")){
-                    ponteiro = Integer.parseInt(instrucao.get(2));
+                if(pilha.remove(topo).equalsIgnoreCase("true")){
+                    ponteiro = Integer.parseInt(instrucao.get(2))-1;
                 }else{
                     ponteiro++;
                 }
@@ -128,30 +126,26 @@ public class MaquinaVirtual {
         if(pilha.size()>1) {
             if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
                 float a = Float.parseFloat(pilha.get(topo - 1));
-                float b = Float.parseFloat(pilha.get(topo));
+                float b = Float.parseFloat(pilha.remove(topo));
+                topo--;
                 switch (instrucao.get(1)){
                     case "BGE":
-                        pilha.set(topo-1,String.valueOf(a>=b));
-                        topo--;
+                        pilha.set(topo,String.valueOf(a>=b));
                         ponteiro++;
                         break;
                     case "BGR":
-                        pilha.set(topo-1,String.valueOf(a>b));
-                        topo--;
+                        pilha.set(topo,String.valueOf(a>b));
                         ponteiro++;
                         break;
                     case "DIF":
-                        pilha.set(topo-1,String.valueOf(a!=b));
-                        topo--;
+                        pilha.set(topo,String.valueOf(a!=b));
                         ponteiro++;
                         break;
-                    case "EQL":pilha.set(topo-1,String.valueOf(a==b));
-                        topo--;
+                    case "EQL":pilha.set(topo,String.valueOf(a==b));
                         ponteiro++;
                         break;
                     case "SME":
-                        pilha.set(topo-1,String.valueOf(a<=b));
-                        topo--;
+                        pilha.set(topo,String.valueOf(a<=b));
                         ponteiro++;
                         break;
                     case "SMR":
@@ -341,7 +335,7 @@ public class MaquinaVirtual {
         textArea.setCaretColor(Color.GREEN);
         textArea.setEditable(false);
         textArea.setContentType("text/html");
-        textArea.setText("<html<head><style>"+style+"</style></head><body>"+history+"</body></html>");
+        textArea.setText("<html<head><style>"+style+"</style></head><body><p>"+history+"</p></body></html>");
         textArea.setPreferredSize(new Dimension(500, 500));
         textArea.setOpaque(false);
 
@@ -358,31 +352,79 @@ public class MaquinaVirtual {
     }
 
     void updateOutput(String out){
-        if(out.contains("\"")){
-            out = out.replace("\"","");
-        }
+        out = out.replace("\"","");
+        out = out.replace("'","");
         history += out;
         textArea.setText("<html<head><style>"+style+"</style></head><body>"+history+"</body></html>");
     }
 
     private String getUserInput() {
-        // O JOptionPane.showInputDialog pausa a Thread atual (da VM)
-        // e espera o usuário digitar na janelinha.
-        String input = JOptionPane.showInputDialog(frame,
-                "A VM solicita uma entrada de dados:",
-                "Entrada de Dados (REA)",
-                JOptionPane.QUESTION_MESSAGE);
-
-        // Se o usuário clicar em cancelar ou fechar, evitamos NullPointerException
-        if (input == null) {
-            input = "";
-            quit("Usuário cancelou a entrada de dados.");
+        // 1. Preparar a área para digitação
+        // Usamos invokeAndWait para garantir que a UI esteja pronta antes de travar no semáforo
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                textArea.setEditable(true);
+                textArea.setCaretPosition(textArea.getDocument().getLength()+1); // Cursor no final
+                textArea.requestFocusInWindow();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        // Mostra no console o que foi digitado para manter o histórico visual
-        updateOutput(" > " + input + "<br>");
+        // 2. Marcar onde o texto "antigo" termina
+        int offsetInicial = textArea.getDocument().getLength();
 
-        return input.trim();
+        // 3. Criar o Listener que vai capturar o Enter
+        KeyAdapter inputListener = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    e.consume(); // Evita pular linha visualmente no HTML
+
+                    try {
+                        // Pega o documento atual (que contém o texto antigo + o que o usuário digitou)
+                        javax.swing.text.Document doc = textArea.getDocument();
+                        int offsetFinal = doc.getLength();
+                        int tamanhoDigitado = offsetFinal - offsetInicial;
+
+                        if (tamanhoDigitado > 0) {
+                            // Extrai APENAS o trecho novo
+                            userInput = doc.getText(offsetInicial, tamanhoDigitado).trim();
+                        } else {
+                            userInput = "";
+                        }
+                    } catch (javax.swing.text.BadLocationException ex) {
+                        ex.printStackTrace();
+                        userInput = "";
+                    }
+
+                    // Remove o listener para não acumular eventos
+                    textArea.removeKeyListener(this);
+
+                    // Trava a edição novamente
+                    textArea.setEditable(false);
+
+                    // Libera a Thread da VM
+                    sem.release();
+                }
+            }
+        };
+
+        textArea.addKeyListener(inputListener);
+
+        // 4. A Thread da VM para aqui e espera o usuário apertar Enter
+        try {
+            sem.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 5. IMPORTANTE: Atualiza o histórico HTML interno
+        // Se não fizermos isso, na próxima vez que chamar updateOutput,
+        // o que o usuário digitou na tela vai sumir, pois o 'history' ainda não tem esse texto.
+        history += userInput + "<br>";
+
+        return userInput;
     }
 
     void quit(String msg){
