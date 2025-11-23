@@ -356,7 +356,6 @@ public class Build {
             outputLog.append("<h1 class='success'>Programa compilado com sucesso</h1></br>");
 
             MaquinaVirtual vm = new MaquinaVirtual(parent,codigIn);
-            //vm.showcodigInFrame(); //LEGADO
         }
 
         outputLog.append(

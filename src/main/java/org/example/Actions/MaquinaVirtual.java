@@ -44,6 +44,7 @@ public class MaquinaVirtual {
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
+        showcodigInFrame();
         initializeWindow();
         new Thread(this::performVM).start();
     }
@@ -83,7 +84,7 @@ public class MaquinaVirtual {
                     quit("Leitura de tipo incorreta! ["+instrucao.get(0)+","+instrucao.get(1)+","+instrucao.get(2)+"]");
                     break;
                 }
-                pilha.add(getUserInput());
+                pilha.add(input);
                 topo++;
                 ponteiro++;
                 break;
@@ -205,7 +206,7 @@ public class MaquinaVirtual {
             ponteiro++;
         }else if(instrucao.get(1).equals("STR")) {
             if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
-                pilha.set(Integer.parseInt(instrucao.get(2))-1, pilha.get(topo));
+                pilha.set(Integer.parseInt(instrucao.get(2))-1, pilha.remove(topo));
                 topo--;
                 ponteiro++;
             } else {
@@ -214,24 +215,26 @@ public class MaquinaVirtual {
         }else if(instrucao.get(1).equals("LDV")){
             if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
                 topo++;
-                pilha.add(pilha.get(Integer.parseInt(instrucao.get(2))));
+                pilha.add(pilha.get(Integer.parseInt(instrucao.get(2))-1));
                 ponteiro++;
             } else {
                 quit("Overflow! pilha["+pilha.size()+"] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
         }else if(instrucao.get(1).equals("LDX")){
             if (!pilha.isEmpty()) {
-                pilha.set(topo,String.valueOf(topo));
+                int endereco = Integer.parseInt(pilha.get(topo));
+                pilha.set(topo,pilha.get(endereco-1));
                 ponteiro++;
             } else {
                 quit("Overflow! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
         }else if(instrucao.get(1).equals("STX")){
             if(pilha.size()>1) {
-                int endereco = topo;
+                int endereco = Integer.parseInt(pilha.remove(topo));
                 topo--;
                 String valor = pilha.get(topo);
-                pilha.set(endereco, valor);
+                pilha.set(endereco-1, valor);
+                pilha.remove(topo);
                 topo--;
                 ponteiro++;
             } else {
@@ -261,12 +264,12 @@ public class MaquinaVirtual {
     private void aritmetica(ArrayList<String> instrucao) {
         if(topo>0){
             if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
-                int topoValue = Integer.parseInt(pilha.get(topo-1));
-                int topoMenosUm = Integer.parseInt(pilha.get(topo-1));
+                int topoValue = Integer.parseInt(pilha.remove(topo));
+                topo--;
+                int topoMenosUm = Integer.parseInt(pilha.get(topo));
                 switch (instrucao.get(1)) {
                     case "ADD":
-                        topo++;
-                        pilha.add(String.valueOf(topoMenosUm + topoValue));
+                        pilha.set(topo,String.valueOf(topoMenosUm + topoValue));
                         ponteiro++;
                         break;
                     case "DIV":
@@ -274,18 +277,15 @@ public class MaquinaVirtual {
                             quit("Divisão por zero! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
                             break;
                         }
-                        topo++;
-                        pilha.add(String.valueOf(topoMenosUm / topoValue));
+                        pilha.set(topo,String.valueOf(topoMenosUm / topoValue));
                         ponteiro++;
                         break;
                     case "MUL":
-                        topo++;
-                        pilha.add(String.valueOf(topoMenosUm * topoValue));
+                        pilha.set(topo,String.valueOf(topoMenosUm * topoValue));
                         ponteiro++;
                         break;
                     case "SUB":
-                        topo++;
-                        pilha.add(String.valueOf(topoMenosUm - topoValue));
+                        pilha.set(topo,String.valueOf(topoMenosUm - topoValue));
                         ponteiro++;
                         break;
                 }
@@ -366,29 +366,23 @@ public class MaquinaVirtual {
     }
 
     private String getUserInput() {
-        textArea.setEditable(true);
-        textArea.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    e.consume(); // evita nova linha
+        // O JOptionPane.showInputDialog pausa a Thread atual (da VM)
+        // e espera o usuário digitar na janelinha.
+        String input = JOptionPane.showInputDialog(frame,
+                "A VM solicita uma entrada de dados:",
+                "Entrada de Dados (REA)",
+                JOptionPane.QUESTION_MESSAGE);
 
-                    userInput = textArea.getText().trim();
-                    textArea.setEditable(false);
-
-                    sem.release(); // libera o método que estava esperando
-                }
-            }
-        });
-
-        try {
-            // Aguarda até o usuário apertar ENTER
-            sem.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        // Se o usuário clicar em cancelar ou fechar, evitamos NullPointerException
+        if (input == null) {
+            input = "";
+            quit("Usuário cancelou a entrada de dados.");
         }
-        updateOutput(userInput);
-        return userInput;
+
+        // Mostra no console o que foi digitado para manter o histórico visual
+        updateOutput(" > " + input + "<br>");
+
+        return input.trim();
     }
 
     void quit(String msg){
