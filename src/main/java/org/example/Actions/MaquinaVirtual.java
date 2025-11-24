@@ -24,12 +24,13 @@ public class MaquinaVirtual {
     private static final HashSet<String> iRelacional = new HashSet<>(Set.of("BGE", "BGR", "DIF", "EQL", "SME", "SMR"));
     private static final HashSet<String> iDesvio = new HashSet<>(Set.of("JMF", "JMP", "JMT", "STP"));
     private static final HashSet<String> iDados = new HashSet<>(Set.of("REA", "WRT"));
+    private boolean stop = false;
     List<String> pilha = new ArrayList<>();
     int topo = -1;
     Integer ponteiro = 0;
     private final Semaphore sem = new Semaphore(0);
     private String userInput = "";
-    String history="Execucao iniciada...<br>--<br>";
+    String history="";
     String style= """
                 body {
                     background-color: #000000;
@@ -50,23 +51,32 @@ public class MaquinaVirtual {
     }
 
     private void performVM(){
-        int n = codigIn.size();
-        int m = 3;
-        for (int i = 0; i < n; i++) {
-            ArrayList<String> row = codigIn.get(i);
-            System.out.println( "["+row.get(0)+","+row.get(1)+","+row.get(2)+"]");
-            if (iAritmetica.contains(row.get(1))) {
-                aritmetica(row);
-            }else if (iMemoria.contains(row.get(1))) {
-                memoria(row);
-            }else if (iLogica.contains(row.get(1))) {
-                logica(row);
-            }else if (iRelacional.contains(row.get(1))) {
-                relacional(row);
-            }else if (iDesvio.contains(row.get(1))) {
-                desvio(row);
-            }else if (iDados.contains(row.get(1))) {
-                dados(row);
+        while(!stop){
+            try {
+                ArrayList<String> row = codigIn.get(ponteiro);
+                System.out.println( "["+row.get(0)+","+row.get(1)+","+row.get(2)+"]");
+                if (iAritmetica.contains(row.get(1))) {
+                    aritmetica(row);
+                }else if (iMemoria.contains(row.get(1))) {
+                    memoria(row);
+                }else if (iLogica.contains(row.get(1))) {
+                    logica(row);
+                }else if (iRelacional.contains(row.get(1))) {
+                    relacional(row);
+                }else if (iDesvio.contains(row.get(1))) {
+                    desvio(row);
+                }else if (iDados.contains(row.get(1))) {
+                    dados(row);
+                }else{
+                    quit("Erro Fatal: Instrucao desconhecida.[" + row.get(0) + "," + row.get(1) + "," + row.get(2) + "]");
+                }
+
+                if (ponteiro < 0) {
+                    quit("Erro Fatal: Ponteiro de instrução negativo. [" + row.get(0) + "," + row.get(1) + "," + row.get(2) + "]");
+                    break;
+                }
+            } catch (Exception e) {
+                quit("Erro Fatal: "+e.getMessage());
             }
         }
     }
@@ -199,7 +209,7 @@ public class MaquinaVirtual {
             pilha.add(instrucao.get(2));
             ponteiro++;
         }else if(instrucao.get(1).equals("STR")) {
-            if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
+            if (pilha.size() >= Integer.parseInt(instrucao.get(2))-1) {
                 pilha.set(Integer.parseInt(instrucao.get(2))-1, pilha.remove(topo));
                 topo--;
                 ponteiro++;
@@ -207,7 +217,7 @@ public class MaquinaVirtual {
                 quit("Overflow! pilha["+pilha.size()+"] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
         }else if(instrucao.get(1).equals("LDV")){
-            if (pilha.size() >= Integer.parseInt(instrucao.get(2))) {
+            if (pilha.size() >= Integer.parseInt(instrucao.get(2))-1) {
                 topo++;
                 pilha.add(pilha.get(Integer.parseInt(instrucao.get(2))-1));
                 ponteiro++;
@@ -335,8 +345,8 @@ public class MaquinaVirtual {
         textArea.setCaretColor(Color.GREEN);
         textArea.setEditable(false);
         textArea.setContentType("text/html");
-        textArea.setText("<html<head><style>"+style+"</style></head><body><p>"+history+"</p></body></html>");
-        textArea.setPreferredSize(new Dimension(500, 500));
+        textArea.setText("<html<head><style>"+style+"</style></head><body>"+history+"</body></html>");
+        textArea.setPreferredSize(new Dimension(800, 500));
         textArea.setOpaque(false);
 
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -359,36 +369,31 @@ public class MaquinaVirtual {
     }
 
     private String getUserInput() {
-        // 1. Preparar a área para digitação
-        // Usamos invokeAndWait para garantir que a UI esteja pronta antes de travar no semáforo
+        updateOutput("<br>--&gt;&nbsp;  ");
         try {
             SwingUtilities.invokeAndWait(() -> {
                 textArea.setEditable(true);
-                textArea.setCaretPosition(textArea.getDocument().getLength()+1); // Cursor no final
+                textArea.setCaretPosition(textArea.getDocument().getLength());
                 textArea.requestFocusInWindow();
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 2. Marcar onde o texto "antigo" termina
         int offsetInicial = textArea.getDocument().getLength();
 
-        // 3. Criar o Listener que vai capturar o Enter
         KeyAdapter inputListener = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    e.consume(); // Evita pular linha visualmente no HTML
+                    e.consume();
 
                     try {
-                        // Pega o documento atual (que contém o texto antigo + o que o usuário digitou)
                         javax.swing.text.Document doc = textArea.getDocument();
                         int offsetFinal = doc.getLength();
                         int tamanhoDigitado = offsetFinal - offsetInicial;
 
                         if (tamanhoDigitado > 0) {
-                            // Extrai APENAS o trecho novo
                             userInput = doc.getText(offsetInicial, tamanhoDigitado).trim();
                         } else {
                             userInput = "";
@@ -398,13 +403,10 @@ public class MaquinaVirtual {
                         userInput = "";
                     }
 
-                    // Remove o listener para não acumular eventos
                     textArea.removeKeyListener(this);
 
-                    // Trava a edição novamente
                     textArea.setEditable(false);
 
-                    // Libera a Thread da VM
                     sem.release();
                 }
             }
@@ -412,35 +414,29 @@ public class MaquinaVirtual {
 
         textArea.addKeyListener(inputListener);
 
-        // 4. A Thread da VM para aqui e espera o usuário apertar Enter
         try {
             sem.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // 5. IMPORTANTE: Atualiza o histórico HTML interno
-        // Se não fizermos isso, na próxima vez que chamar updateOutput,
-        // o que o usuário digitou na tela vai sumir, pois o 'history' ainda não tem esse texto.
         history += userInput + "<br>";
 
         return userInput;
     }
 
     void quit(String msg){
+        stop = true;
         textArea.setEditable(false);
-        updateOutput("<br>--<br>Execução finalizada com mensagem: <b>" + msg + "</b>");
+        updateOutput("<br>--<br><i>Execução finalizada com mensagem:</i> <b>" + msg + "</b>");
         return;
     }
 
     void quit(){
+        stop = true;
         textArea.setEditable(false);
-        updateOutput("<br>--<br>Execução finalizada.</b>");
+        updateOutput("<br>--<br><i>Execução finalizada.</i></b>");
         return;
-    }
-
-    private void showError(String msg){
-        JOptionPane.showMessageDialog(parent, msg);
     }
 
     public void showcodigInFrame() {
@@ -465,16 +461,14 @@ public class MaquinaVirtual {
         JTableHeader header = table.getTableHeader();
         header.setFont(new Font("Courier New", Font.BOLD, 18));
 
-        // ScrollPane com row header
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Frame
         JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.add(scrollPane);
         frame.pack();
-        frame.setLocationRelativeTo(parent); // parent deve ser JFrame ou Component
+        frame.setLocationRelativeTo(parent);
         frame.setVisible(true);
-    } //LEGADO
+    }
     
 }
