@@ -45,7 +45,7 @@ public class MaquinaVirtual {
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
-        //showcodigInFrame();
+        showcodigInFrame();
         initializeWindow();
         new Thread(this::performVM).start();
     }
@@ -70,7 +70,6 @@ public class MaquinaVirtual {
                 }else{
                     quit("Erro Fatal: Instrucao desconhecida.[" + row.get(0) + "," + row.get(1) + "," + row.get(2) + "]");
                 }
-
                 if (ponteiro < 0) {
                     quit("Erro Fatal: Ponteiro de instrução negativo. [" + row.get(0) + "," + row.get(1) + "," + row.get(2) + "]");
                     break;
@@ -268,12 +267,12 @@ public class MaquinaVirtual {
     private void aritmetica(ArrayList<String> instrucao) {
         if(topo>0){
             if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
-                int topoValue = Integer.parseInt(pilha.remove(topo));
+                double topoValue = Double.parseDouble(pilha.remove(topo));
                 topo--;
-                int topoMenosUm = Integer.parseInt(pilha.get(topo));
+                double topoMenosUm = Double.parseDouble(pilha.get(topo));
                 switch (instrucao.get(1)) {
                     case "ADD":
-                        pilha.set(topo,String.valueOf(topoMenosUm + topoValue));
+                        pilha.set(topo,String.format("%.1f", topoMenosUm + topoValue));
                         ponteiro++;
                         break;
                     case "DIV":
@@ -281,15 +280,27 @@ public class MaquinaVirtual {
                             quit("Divisão por zero! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
                             break;
                         }
-                        pilha.set(topo,String.valueOf(topoMenosUm / topoValue));
+                        pilha.set(topo,String.format("%.1f",topoMenosUm / topoValue));
                         ponteiro++;
                         break;
                     case "MUL":
-                        pilha.set(topo,String.valueOf(topoMenosUm * topoValue));
+                        pilha.set(topo,String.format("%.1f",topoMenosUm * topoValue));
                         ponteiro++;
                         break;
                     case "SUB":
-                        pilha.set(topo,String.valueOf(topoMenosUm - topoValue));
+                        pilha.set(topo,String.format("%.1f",topoMenosUm - topoValue));
+                        ponteiro++;
+                        break;
+                    case "MOD":
+                        pilha.set(topo,String.format("%.1f",topoMenosUm % topoValue));
+                        ponteiro++;
+                        break;
+                    case "REM":
+                        pilha.set(topo,String.valueOf((int)(topoMenosUm % topoValue)));
+                        ponteiro++;
+                        break;
+                    case "POW":
+                        pilha.set(topo,String.valueOf((int)topoMenosUm ^ (int)topoValue));
                         ponteiro++;
                         break;
                 }
@@ -364,12 +375,11 @@ public class MaquinaVirtual {
     void updateOutput(String out){
         out = out.replace("\"","");
         out = out.replace("'","");
-        history += out;
+        history += out +"<br>";
         textArea.setText("<html<head><style>"+style+"</style></head><body>"+history+"</body></html>");
     }
 
     private String getUserInput() {
-        updateOutput("<br>--&gt;&nbsp;  ");
         try {
             SwingUtilities.invokeAndWait(() -> {
                 textArea.setEditable(true);

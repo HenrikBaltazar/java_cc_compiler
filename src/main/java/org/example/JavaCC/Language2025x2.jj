@@ -239,7 +239,7 @@ void tipos():{Token tipoToken;}
 
 void constants():{Token constant;}
 {
-    constant = <NUM> {semantico.constanteInteira(constant);} | constant = <REAL> {semantico.constanteReal(constant);} | constant = <TEXT> {semantico.constanteLiteral(constant);} | <TRUE> {semantico.constanteVerdadeira();} | <FALSE> {semantico.constanteFalsa();}
+    constant = <NUM> {semantico.constanteInteira(constant);} | constant = <REAL> {semantico.constanteReal(constant);} | constant = <TEXT> {semantico.constanteLiteral(constant);} | constant = <TRUE> {semantico.constanteVerdadeira(constant);} | constant = <FALSE> {semantico.constanteFalsa(constant);}
 }
 
 void constantsDeclare():{}
@@ -452,7 +452,7 @@ void elemento(): {Token identToken; Token vetor;}
 void repeticao(): {}
 {
     try{
-        <LOOP> <WHILE> expressao() {semantico.loop1();}
+        <LOOP> <WHILE>{semantico.loop0();} expressao() {semantico.loop1();}
         listaDeComandos() {semantico.loop2();}
         <END> <SEMICOLON>
     }catch(ParseException e){

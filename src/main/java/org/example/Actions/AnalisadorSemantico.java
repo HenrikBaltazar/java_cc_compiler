@@ -59,6 +59,19 @@ public class AnalisadorSemantico {
         erros.append(erro);
     }
 
+    public String getConstTypeByCat(int cat){
+        if(cat == 1){
+            return "constante inteira";
+        }else if(cat == 2){
+            return "constante real";
+        }else if(cat == 3){
+            return "constante literal";
+        }else if(cat == 4){
+            return "flag";
+        }
+        return "";
+    }
+
 
     public void programa1(Token programa) // #P1
     {
@@ -208,26 +221,46 @@ public class AnalisadorSemantico {
     }
 
     public void inicializaVet(Token brace) { // #IV
-            if(valAux == 1){
-                int baseV = baseDoUltimoVetor;
-                codigIn.add(linha(ponteiro, "STR", baseV));
+        // CORREÇÃO DE OURO:
+        // Não usamos baseDoUltimoVetor (que ainda é 0).
+        // Usamos VT (Total de Variáveis) + 1 para achar o próximo buraco livre na memória.
+        // Exemplo: Se já tem 'i' (VT=1), o vetor começa no 2.
+        int baseCorreta = VT + 1;
+
+        if(valAux == 1){
+            // Caso: x : num[5] = {0}; (Inicializa tudo com um valor só)
+
+            // 1. Grava o primeiro valor na base
+            codigIn.add(linha(ponteiro, "STR", baseCorreta));
+            ponteiro++;
+
+            // 2. Copia para o resto do vetor
+            for(int j = 1; j < tamanhoDoUltimoVetor; j++){
+                codigIn.add(linha(ponteiro, "LDV", baseCorreta)); // Pega o valor da 1ª posição
                 ponteiro++;
-                for(int j = 1; j < tamanhoDoUltimoVetor - 1; j++){
-                    codigIn.add(linha(ponteiro, "LDV", baseV));
-                    ponteiro++;
-                    codigIn.add(linha(ponteiro, "STR", baseV + (j-1)));
-                    ponteiro++;
-                }
-            }else if(valAux == tamanhoDoUltimoVetor){
-                for(int i = 0; i < tamanhoDoUltimoVetor; i++){
-                    codigIn.add(linha(ponteiro, "STR", baseDoUltimoVetor + i));
-                    ponteiro++;
-                }
-            }else{
-                //numero de variaveis diferente do tamanha do veto -> erro
-                erroSemantico(brace,"Numero de variaveis diferente do tamanho do vetor");
+                codigIn.add(linha(ponteiro, "STR", baseCorreta + j)); // Grava na próxima
+                ponteiro++;
             }
-            valAux = 0;
+
+        } else if(valAux == tamanhoDoUltimoVetor){
+            // Caso: x : num[5] = {"A", "B", "C"...}; (Inicialização completa)
+
+            // O loop percorre cada item que já foi empilhado pelos comandos anteriores (LDS/LDI...)
+            // E gera o STR para a posição correta.
+            for(int i = 0; i < tamanhoDoUltimoVetor; i++){
+
+                // AQUI ESTAVA O ERRO (STR 0, STR 1...)
+                // COM A CORREÇÃO: (baseCorreta + i)
+                // i=0 -> STR (2+0) = STR 2 (Correto!)
+                // i=1 -> STR (2+1) = STR 3 (Correto!)
+                codigIn.add(linha(ponteiro, "STR", baseCorreta + i));
+                ponteiro++;
+            }
+
+        } else {
+            erroSemantico(brace, "Numero de variaveis diferente do tamanho do vetor");
+        }
+        valAux = 0;
     }
 
     public void inicializaEscalar(){ // #IE
@@ -242,29 +275,46 @@ public class AnalisadorSemantico {
     }
 
     public void constanteInteira(Token token){ //#C1
-        Integer valor = Integer.parseInt(token.image);
-        codigIn.add(linha(ponteiro, "LDI", valor));
+        if(categoriaAtual != 1){
+            erroSemantico(token, "identificador "+found(token)+" do tipo constante inteira mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDI", token.image));
         ponteiro++;
     }
 
     public void constanteReal(Token token){ //#C2
-        Integer valor = Integer.parseInt(token.image);
-        codigIn.add(linha(ponteiro, "LDR", valor));
+        if(categoriaAtual != 2){
+            erroSemantico(token, "identificador "+found(token)+" do tipo constante real mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDR", token.image));
         ponteiro++;
     }
 
     public void constanteLiteral(Token token){ //#C3
-        String valor = token.image;
-        codigIn.add(linha(ponteiro, "LDS", valor));
+        if(categoriaAtual != 3){
+            erroSemantico(token, "identificador "+found(token)+" do tipo constante literal mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
+            return;
+        }
+        codigIn.add(linha(ponteiro, "LDS", token.image));
         ponteiro++;
     }
 
-    public void constanteVerdadeira(){ // #C4
+    public void constanteVerdadeira(Token token){ // #C4
+        if(categoriaAtual != 4){
+            erroSemantico(token, "identificador "+found(token)+" do tipo flag mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
+            return;
+        }
         codigIn.add(linha(ponteiro, "LDB",1));
         ponteiro++;
     }
 
-    public void constanteFalsa(){ //#C5
+    public void constanteFalsa(Token token){ //#C5
+        if(categoriaAtual != 4){
+            erroSemantico(token, "identificador "+found(token)+" do tipo flag mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
+            return;
+        }
         codigIn.add(linha(ponteiro, "LDB", 0));
         ponteiro++;
     }
@@ -345,6 +395,7 @@ public class AnalisadorSemantico {
     }
 
     public void expressao1(Token id){ // #E1
+        categoriaAtual = 1;
         System.out.println(tabela);
         String nome = id.image;
         ExpAux = tabela.lookup(nome);
@@ -359,6 +410,7 @@ public class AnalisadorSemantico {
     }
 
     public void expressao2(){ //#E2
+        categoriaAtual = 1;
         if(ExpAux == null){return;}
 
         // Se não tem índice (escalar simples)
@@ -641,8 +693,8 @@ public class AnalisadorSemantico {
     }
 
     public void saidaConstReal(Token r){ //#K2
-        Integer valor = Integer.parseInt(r.image);
-
+        //Integer valor = Integer.parseInt(r.image);
+        String valor = r.image;
         codigIn.add(linha(ponteiro, "LDR", valor)); //
         ponteiro++;
 
@@ -704,17 +756,22 @@ public class AnalisadorSemantico {
         instrucaoPendente.set(2, String.valueOf(ponteiro));
     }
 
-    public void loop1(){
+    public void loop0(){
         inicioLoop = ponteiro;
+    }
+
+    public void loop1(){
         codigIn.add(linha(ponteiro, "JMF", 0));
         pilhaDeDesvios.add(ponteiro);
         ponteiro++;
     }
 
     public void loop2(){
+        //gerar instrução(ponteiro, JMP, inicioLoop); ERRADO!!!!
         codigIn.add(linha(ponteiro, "JMP", inicioLoop));
         ponteiro++;
 
+        //ajustar JMF pendente para o ponteiro atual (saída do laço). correto!
         int ultimoIndice = pilhaDeDesvios.size() - 1;
         int enderecoPendente = pilhaDeDesvios.remove(ultimoIndice);
 

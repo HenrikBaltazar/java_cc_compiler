@@ -221,13 +221,13 @@ semantico.constanteLiteral(constant);
       break;
       }
     case TRUE:{
-      jj_consume_token(TRUE);
-semantico.constanteVerdadeira();
+      constant = jj_consume_token(TRUE);
+semantico.constanteVerdadeira(constant);
       break;
       }
     case FALSE:{
-      jj_consume_token(FALSE);
-semantico.constanteFalsa();
+      constant = jj_consume_token(FALSE);
+semantico.constanteFalsa(constant);
       break;
       }
     default:
@@ -758,6 +758,7 @@ semantico.rNot();
     try {
       jj_consume_token(LOOP);
       jj_consume_token(WHILE);
+semantico.loop0();
       expressao();
 semantico.loop1();
       listaDeComandos();
