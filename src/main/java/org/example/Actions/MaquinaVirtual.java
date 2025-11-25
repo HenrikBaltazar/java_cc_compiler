@@ -308,13 +308,13 @@ public class MaquinaVirtual {
                         }
                         resultado = topoMenosUm / topoValue;
                         break;
-                    case "MOD": // Resto da divisão (para Inteiros/Reais)
+                    case "MOD":
                         resultado = topoMenosUm % topoValue;
                         break;
-                    case "REM": // Similar ao MOD
+                    case "REM":
                         resultado = topoMenosUm % topoValue;
                         break;
-                    case "POW": // Potência
+                    case "POW":
                         resultado = Math.pow(topoMenosUm, topoValue);
                         break;
                 }
@@ -324,7 +324,6 @@ public class MaquinaVirtual {
                 if (resultado == (long) resultado) {
                     resultadoStr = String.format("%d", (long) resultado);
                 } else {
-                    // Usa ponto como separador decimal para evitar problemas de locale (vírgula)
                     resultadoStr = String.format(Locale.US, "%.2f", resultado);
                 }
 
