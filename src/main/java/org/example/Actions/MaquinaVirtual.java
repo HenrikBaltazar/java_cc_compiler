@@ -18,7 +18,7 @@ public class MaquinaVirtual {
     private JFrame frame;
     private JEditorPane textArea;
     private static final Font FONT_OUTPUT = new Font("Monospaced", Font.PLAIN, 20);
-    private static final HashSet<String> iAritmetica = new HashSet<>(Set.of("ADD", "DIV", "MUL", "SUB"));
+    private static final HashSet<String> iAritmetica = new HashSet<>(Set.of("ADD", "DIV", "MUL", "SUB", "MOD", "REM", "POW"));
     private static final HashSet<String> iMemoria = new HashSet<>(Set.of("ALB", "ALI", "ALR", "ALS", "LDB","LDI","LDR","LDS","LDV","STR", "LDX", "STX"));
     private static final HashSet<String> iLogica = new HashSet<>(Set.of("AND", "NOT", "OR"));
     private static final HashSet<String> iRelacional = new HashSet<>(Set.of("BGE", "BGR", "DIF", "EQL", "SME", "SMR"));
@@ -42,7 +42,7 @@ public class MaquinaVirtual {
                     white-space: pre-wrap;
                 }
                 """;
-    boolean acceptString = false;
+    boolean checkType = false;
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
@@ -97,7 +97,6 @@ public class MaquinaVirtual {
                 ponteiro++;
                 break;
             case "WRT":
-                acceptString = true;
                 updateOutput(pilha.remove(topo--));
                 ponteiro++;
                 break;
@@ -206,7 +205,7 @@ public class MaquinaVirtual {
     private void memoria(ArrayList<String> instrucao) {
         HashSet<String> l = new HashSet<>(Set.of("LDB", "LDI","LDR","LDS"));
         if(l.contains(instrucao.get(1))){
-            if(!acceptString) {
+            if(checkType) {
                 if (instrucao.get(1).equalsIgnoreCase("LDB") && detectarTipo(pilha.get(topo)) != 4) {
                     quit("Erro! Declaracao de tipo incorreta! esperava <b>constante flag!</b> [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
 
@@ -221,7 +220,7 @@ public class MaquinaVirtual {
 
                 }
             }
-            acceptString = false;
+            checkType = false;
             topo++;
             pilha.add(instrucao.get(2));
             ponteiro++;
@@ -258,11 +257,11 @@ public class MaquinaVirtual {
                 pilha.remove(topo);
                 topo--;
                 ponteiro++;
-                acceptString = true;
             } else {
                 quit("Overflow! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
         }else{
+            checkType = true;
             int deslocamento = Integer.parseInt(instrucao.get(2));
             String value = switch (instrucao.get(1)) {
                 case "ALB" -> "false";
