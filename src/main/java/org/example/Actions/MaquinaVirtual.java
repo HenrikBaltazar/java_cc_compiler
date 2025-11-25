@@ -46,7 +46,7 @@ public class MaquinaVirtual {
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
-        showcodigInFrame();
+        //showcodigInFrame();
         initializeWindow();
         new Thread(this::performVM).start();
     }

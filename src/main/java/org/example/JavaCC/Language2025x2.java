@@ -722,7 +722,7 @@ semantico.rPow();
       identToken = jj_consume_token(IDENTIFIER);
 semantico.expressao1(identToken);
       vetor();
-semantico.expressao2();
+semantico.expressao2(identToken);
       break;
       }
     case TRUE:

@@ -399,8 +399,11 @@ public class AnalisadorSemantico {
             temIndice = false; // 4. temIndice ← falso
         }
 
-    public void expressao2(){ //#E2
+    public void expressao2(Token id){ //#E2
         //categoriaAtual = 1;
+        String nome = id.image;
+        ExpAux = tabela.lookup(nome);
+
         if(ExpAux == null){return;}
 
         // Se não tem índice (escalar simples)

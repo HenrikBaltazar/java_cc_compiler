@@ -445,7 +445,7 @@ void maiorPrioridade(): {}{
 
 void elemento(): {Token identToken; Token vetor;}
 {
-        identToken = <IDENTIFIER> {semantico.expressao1(identToken); } vetor() {semantico.expressao2();} | constants() | <EXCLAMATION> <LPAREN> expressao() <RPAREN> {semantico.rNot();} | <LPAREN> expressao() <RPAREN>
+        identToken = <IDENTIFIER> {semantico.expressao1(identToken); } vetor() {semantico.expressao2(identToken);} | constants() | <EXCLAMATION> <LPAREN> expressao() <RPAREN> {semantico.rNot();} | <LPAREN> expressao() <RPAREN>
 
 }
 
