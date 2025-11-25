@@ -42,6 +42,7 @@ public class MaquinaVirtual {
                     white-space: pre-wrap;
                 }
                 """;
+    boolean acceptString = false;
     public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
         this.parent = parent;
         this.codigIn = codigIn;
@@ -96,6 +97,7 @@ public class MaquinaVirtual {
                 ponteiro++;
                 break;
             case "WRT":
+                acceptString = true;
                 updateOutput(pilha.remove(topo--));
                 ponteiro++;
                 break;
@@ -204,6 +206,22 @@ public class MaquinaVirtual {
     private void memoria(ArrayList<String> instrucao) {
         HashSet<String> l = new HashSet<>(Set.of("LDB", "LDI","LDR","LDS"));
         if(l.contains(instrucao.get(1))){
+            if(!acceptString) {
+                if (instrucao.get(1).equalsIgnoreCase("LDB") && detectarTipo(pilha.get(topo)) != 4) {
+                    quit("Erro! Declaracao de tipo incorreta! esperava <b>constante flag!</b> [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+
+                } else if (instrucao.get(1).equalsIgnoreCase("LDI") && detectarTipo(pilha.get(topo)) != 1) {
+                    quit("Erro! Declaracao de tipo incorreta! esperava <b>constante inteira!</b> [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+
+                } else if (instrucao.get(1).equalsIgnoreCase("LDR") && detectarTipo(pilha.get(topo)) != 2) {
+                    quit("Erro! Declaracao de tipo incorreta! esperava <b>constante real!</b> [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+
+                } else if (instrucao.get(1).equalsIgnoreCase("LDS") && detectarTipo(pilha.get(topo)) != 3) {
+                    quit("Erro! Declaracao de tipo incorreta! esperava <b>constante literal!</b> [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+
+                }
+            }
+            acceptString = false;
             topo++;
             pilha.add(instrucao.get(2));
             ponteiro++;
@@ -240,6 +258,7 @@ public class MaquinaVirtual {
                 pilha.remove(topo);
                 topo--;
                 ponteiro++;
+                acceptString = true;
             } else {
                 quit("Overflow! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
             }
@@ -265,52 +284,60 @@ public class MaquinaVirtual {
     }
 
     private void aritmetica(ArrayList<String> instrucao) {
-        if(topo>0){
-            if ((detectarTipo(pilha.get(topo)) == 1 || detectarTipo(pilha.get(topo)) == 2 ) && (detectarTipo(pilha.get(topo-1)) == 1 || detectarTipo(pilha.get(topo-1)) == 2)) {
+        if (topo > 0) {
+            try {
                 double topoValue = Double.parseDouble(pilha.remove(topo));
                 topo--;
                 double topoMenosUm = Double.parseDouble(pilha.get(topo));
+
+                double resultado = 0;
+
                 switch (instrucao.get(1)) {
                     case "ADD":
-                        pilha.set(topo,String.format("%.1f", topoMenosUm + topoValue));
-                        ponteiro++;
-                        break;
-                    case "DIV":
-                        if (Integer.parseInt(pilha.get(topo)) == 0) {
-                            quit("Divisão por zero! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
-                            break;
-                        }
-                        pilha.set(topo,String.format("%.1f",topoMenosUm / topoValue));
-                        ponteiro++;
-                        break;
-                    case "MUL":
-                        pilha.set(topo,String.format("%.1f",topoMenosUm * topoValue));
-                        ponteiro++;
+                        resultado = topoMenosUm + topoValue;
                         break;
                     case "SUB":
-                        pilha.set(topo,String.format("%.1f",topoMenosUm - topoValue));
-                        ponteiro++;
+                        resultado = topoMenosUm - topoValue;
                         break;
-                    case "MOD":
-                        pilha.set(topo,String.format("%.1f",topoMenosUm % topoValue));
-                        ponteiro++;
+                    case "MUL":
+                        resultado = topoMenosUm * topoValue;
                         break;
-                    case "REM":
-                        pilha.set(topo,String.valueOf((int)(topoMenosUm % topoValue)));
-                        ponteiro++;
+                    case "DIV":
+                        if (topoValue == 0) {
+                            quit("Divisão por zero! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+                            return;
+                        }
+                        resultado = topoMenosUm / topoValue;
                         break;
-                    case "POW":
-                        pilha.set(topo,String.valueOf((int)topoMenosUm ^ (int)topoValue));
-                        ponteiro++;
+                    case "MOD": // Resto da divisão (para Inteiros/Reais)
+                        resultado = topoMenosUm % topoValue;
+                        break;
+                    case "REM": // Similar ao MOD
+                        resultado = topoMenosUm % topoValue;
+                        break;
+                    case "POW": // Potência
+                        resultado = Math.pow(topoMenosUm, topoValue);
                         break;
                 }
-            }else{
-                quit("Operacao incorreta: tipo nao eh num ou real! [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
-            }
-        }else{
-            quit("Overflow! ["+instrucao.get(0)+","+instrucao.get(1)+","+instrucao.get(2)+"]");
-        }
 
+
+                String resultadoStr;
+                if (resultado == (long) resultado) {
+                    resultadoStr = String.format("%d", (long) resultado);
+                } else {
+                    // Usa ponto como separador decimal para evitar problemas de locale (vírgula)
+                    resultadoStr = String.format(Locale.US, "%.2f", resultado);
+                }
+
+                pilha.set(topo, resultadoStr);
+                ponteiro++;
+
+            } catch (NumberFormatException e) {
+                quit("Erro Aritmético: Tentou operar com valor não numérico! Topo: " + pilha.get(topo));
+            }
+        } else {
+            quit("Stack Underflow! (Faltam operandos para a conta) [" + instrucao.get(0) + "]");
+        }
     }
 
     public static int detectarTipo(String valor) {

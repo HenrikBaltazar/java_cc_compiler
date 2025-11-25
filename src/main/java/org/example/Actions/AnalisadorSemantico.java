@@ -27,6 +27,9 @@ public class AnalisadorSemantico {
     public int primeiroBaseInit; //base do primeiro identificador escalara inicializado na linha
     public StringBuilder erros;
     public int inicioLoop;
+
+    public ArrayList<Integer> pilhaDeInicios = new ArrayList<>();
+
     public SymtableEntry ExpAux,AtrAux,ShoAux;
     public int valAux = 0;
     public int indiceEstatico = -1; // -1 indica que não é estático (é dinâmico)
@@ -247,8 +250,7 @@ public class AnalisadorSemantico {
 
             // O loop percorre cada item que já foi empilhado pelos comandos anteriores (LDS/LDI...)
             // E gera o STR para a posição correta.
-            for(int i = 0; i < tamanhoDoUltimoVetor; i++){
-
+            for(int i = tamanhoDoUltimoVetor - 1; i >= 0; i--){
                 // AQUI ESTAVA O ERRO (STR 0, STR 1...)
                 // COM A CORREÇÃO: (baseCorreta + i)
                 // i=0 -> STR (2+0) = STR 2 (Correto!)
@@ -275,46 +277,34 @@ public class AnalisadorSemantico {
     }
 
     public void constanteInteira(Token token){ //#C1
-        if(categoriaAtual != 1){
+/*        if(categoriaAtual != 1){
             erroSemantico(token, "identificador "+found(token)+" do tipo constante inteira mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
             return;
-        }
+        }*/
         codigIn.add(linha(ponteiro, "LDI", token.image));
         ponteiro++;
     }
 
     public void constanteReal(Token token){ //#C2
-        if(categoriaAtual != 2){
-            erroSemantico(token, "identificador "+found(token)+" do tipo constante real mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
-            return;
-        }
         codigIn.add(linha(ponteiro, "LDR", token.image));
         ponteiro++;
     }
 
     public void constanteLiteral(Token token){ //#C3
-        if(categoriaAtual != 3){
-            erroSemantico(token, "identificador "+found(token)+" do tipo constante literal mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
-            return;
-        }
         codigIn.add(linha(ponteiro, "LDS", token.image));
         ponteiro++;
     }
 
     public void constanteVerdadeira(Token token){ // #C4
-        if(categoriaAtual != 4){
-            erroSemantico(token, "identificador "+found(token)+" do tipo flag mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
-            return;
-        }
         codigIn.add(linha(ponteiro, "LDB",1));
         ponteiro++;
     }
 
     public void constanteFalsa(Token token){ //#C5
-        if(categoriaAtual != 4){
+/*        if(categoriaAtual != 4){
             erroSemantico(token, "identificador "+found(token)+" do tipo flag mas esperado do tipo "+expected(getConstTypeByCat(categoriaAtual)));
             return;
-        }
+        }*/
         codigIn.add(linha(ponteiro, "LDB", 0));
         ponteiro++;
     }
@@ -394,23 +384,23 @@ public class AnalisadorSemantico {
         ponteiro++;
     }
 
-    public void expressao1(Token id){ // #E1
-        categoriaAtual = 1;
-        System.out.println(tabela);
-        String nome = id.image;
-        ExpAux = tabela.lookup(nome);
+        public void expressao1(Token id){ // #E1
+            //categoriaAtual = 1;
+            System.out.println(tabela);
+            String nome = id.image;
+            ExpAux = tabela.lookup(nome);
 
-        if(ExpAux == null){
-            erroSemantico(id, "identificador " + found(id) + " não declarado");
-            temIndice = false;
-            return;
+            if(ExpAux == null){
+                erroSemantico(id, "identificador " + found(id) + " não declarado");
+                temIndice = false;
+                return;
+            }
+
+            temIndice = false; // 4. temIndice ← falso
         }
 
-        temIndice = false; // 4. temIndice ← falso
-    }
-
     public void expressao2(){ //#E2
-        categoriaAtual = 1;
+        //categoriaAtual = 1;
         if(ExpAux == null){return;}
 
         // Se não tem índice (escalar simples)
@@ -757,7 +747,8 @@ public class AnalisadorSemantico {
     }
 
     public void loop0(){
-        inicioLoop = ponteiro;
+        //inicioLoop = ponteiro;
+        pilhaDeInicios.add(ponteiro);
     }
 
     public void loop1(){
@@ -766,18 +757,17 @@ public class AnalisadorSemantico {
         ponteiro++;
     }
 
-    public void loop2(){
-        //gerar instrução(ponteiro, JMP, inicioLoop); ERRADO!!!!
-        codigIn.add(linha(ponteiro, "JMP", inicioLoop));
+    public void loop2() {
+        int inicioDoLoopAtual = pilhaDeInicios.remove(pilhaDeInicios.size() - 1);
+
+        codigIn.add(linha(ponteiro, "JMP", inicioDoLoopAtual));
         ponteiro++;
 
-        //ajustar JMF pendente para o ponteiro atual (saída do laço). correto!
-        int ultimoIndice = pilhaDeDesvios.size() - 1;
-        int enderecoPendente = pilhaDeDesvios.remove(ultimoIndice);
+        int ultimoIndiceDesvio = pilhaDeDesvios.size() - 1;
+        int enderecoDoJMF = pilhaDeDesvios.remove(ultimoIndiceDesvio);
 
-        int indiceDaLista = enderecoPendente - 1;
-        ArrayList<String> instrucaoPendente = codigIn.get(indiceDaLista);
 
-        instrucaoPendente.set(2, String.valueOf(ponteiro));
+        codigIn.get(enderecoDoJMF - 1).set(2, String.valueOf(ponteiro));
     }
+
 }
