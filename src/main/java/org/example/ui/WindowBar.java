@@ -24,7 +24,7 @@ public class WindowBar extends JMenuBar{
         jMenuFile.add(jMenuItemSaveFile);
         jMenuItemSaveFileAs = new JMenuItem("Salvar como...");
         jMenuItemSaveFileAs.setFont(TEXT_FONT);
-        jMenuFile.add(jMenuItemSaveFileAs);
+        //jMenuFile.add(jMenuItemSaveFileAs);
 
 
         jMenuEdit = new javax.swing.JMenu("Edição");
@@ -88,6 +88,13 @@ public class WindowBar extends JMenuBar{
             @Override
             public void actionPerformed(ActionEvent e) {
                 parent.getToolBar().buildCode();
+            }
+        });
+
+        jMenuItemRunCode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.getToolBar().runCode();
             }
         });
 

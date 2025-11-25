@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
 
 public class MaquinaVirtual {
     private final String title = "Execução";
-    private final ArrayList<ArrayList<String>> codigIn;
+    private ArrayList<ArrayList<String>> codigIn = new ArrayList<>();
     private final Interface parent;
     private JFrame frame;
     private JEditorPane textArea;
@@ -43,10 +43,18 @@ public class MaquinaVirtual {
                 }
                 """;
     boolean checkType = false;
-    public MaquinaVirtual (Interface parent, ArrayList<ArrayList<String>> codigIn) {
+    public MaquinaVirtual (Interface parent) {
         this.parent = parent;
-        this.codigIn = codigIn;
-        //showcodigInFrame();
+
+    }
+
+    public void setCodigIn (ArrayList<ArrayList<String>> codigIn) {
+        this.codigIn.clear();
+        this.codigIn = new ArrayList<>();
+        this.codigIn.addAll(codigIn);
+    }
+
+    public void execute(){
         initializeWindow();
         new Thread(this::performVM).start();
     }
@@ -225,13 +233,17 @@ public class MaquinaVirtual {
             pilha.add(instrucao.get(2));
             ponteiro++;
         }else if(instrucao.get(1).equals("STR")) {
-            if (pilha.size() >= Integer.parseInt(instrucao.get(2))-1) {
-                pilha.set(Integer.parseInt(instrucao.get(2))-1, pilha.remove(topo));
-                topo--;
-                ponteiro++;
-            } else {
-                quit("Overflow! pilha["+pilha.size()+"] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
-            }
+            if(pilha.size() >= Integer.parseInt(instrucao.get(2)) - 1) {
+                if (detectarTipo(pilha.get(topo))==detectarTipo(pilha.get(Integer.parseInt(instrucao.get(2))-1))) {
+                    pilha.set(Integer.parseInt(instrucao.get(2)) - 1, pilha.remove(topo));
+                    topo--;
+                    ponteiro++;
+                } else {
+                    quit("Erro! Declaracao de tipo incorreta! esperava <b>"+getConstTypeByCat(detectarTipo(pilha.get(Integer.parseInt(instrucao.get(2))-1)))+"</b> mas recebeu "+getConstTypeByCat(detectarTipo(pilha.get(topo)))+" [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+                }
+            }else{
+                quit("Overflow! pilha[" + pilha.size() + "] mas [" + instrucao.get(0) + "," + instrucao.get(1) + "," + instrucao.get(2) + "]");
+                }
         }else if(instrucao.get(1).equals("LDV")){
             if (pilha.size() >= Integer.parseInt(instrucao.get(2))-1) {
                 topo++;
@@ -368,7 +380,18 @@ public class MaquinaVirtual {
         return 3;
     }
 
-
+    public String getConstTypeByCat(int cat){
+        if(cat == 1){
+            return "constante inteira";
+        }else if(cat == 2){
+            return "constante real";
+        }else if(cat == 3){
+            return "constante literal";
+        }else if(cat == 4){
+            return "constante lógica";
+        }
+        return "";
+    }
 
     private void initializeWindow() {
         frame = new JFrame();
@@ -501,7 +524,25 @@ public class MaquinaVirtual {
         JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.add(scrollPane);
-        frame.pack();
+
+        int rowHeight = table.getRowHeight();
+        int headerHeight = header.getPreferredSize().height;
+
+        int frameDecoration = 80;
+
+        int preferredHeight = headerHeight + (n * rowHeight) + frameDecoration;
+
+        table.doLayout();
+        int preferredWidth = table.getPreferredSize().width + 50;
+
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+        int maxHeight = (int) (screen.height * 0.85);
+
+        int finalHeight = Math.min(preferredHeight, maxHeight);
+
+        frame.setSize(preferredWidth, finalHeight);
+
         frame.setLocationRelativeTo(parent);
         frame.setVisible(true);
     }

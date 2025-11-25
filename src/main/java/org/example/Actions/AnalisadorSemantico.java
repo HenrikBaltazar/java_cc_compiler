@@ -62,19 +62,6 @@ public class AnalisadorSemantico {
         erros.append(erro);
     }
 
-    public String getConstTypeByCat(int cat){
-        if(cat == 1){
-            return "constante inteira";
-        }else if(cat == 2){
-            return "constante real";
-        }else if(cat == 3){
-            return "constante literal";
-        }else if(cat == 4){
-            return "flag";
-        }
-        return "";
-    }
-
 
     public void programa1(Token programa) // #P1
     {

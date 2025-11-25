@@ -22,7 +22,7 @@ public class Build {
     DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final List<String> RESERVED_WORDS = List.of("begin","define","start","end","set","num","real","text","flag","read","show","if","then","else","true","false");
     private static final List<String> SPECIAL_SYMBOLS = List.of("==", "!=", ";", "=", ":", ",", ".", "{", "}", "[", "]", "(", ")", "+", "-", ">>=", "*", "/", "%", "**", "%%", "<<", ">>","<<=", "!", "|" ,"&");
-
+    MaquinaVirtual vm;
     List<Token> specialTokensList;
     public Build() {
     }
@@ -179,7 +179,7 @@ public class Build {
         return report;
     }
 
-    public void buildCode() {
+    public void buildCode(boolean execute) {
         StringBuilder css = new StringBuilder(
                 """
                 body {
@@ -354,8 +354,10 @@ public class Build {
 
         if(lexicalApproved && sintaticApproved && semanticApproved) {
             outputLog.append("<h1 class='success'>Programa compilado com sucesso</h1></br>");
-
-            MaquinaVirtual vm = new MaquinaVirtual(parent,codigIn);
+            if(execute)
+                execute(codigIn);
+            else
+                buildIn(codigIn);
         }
 
         outputLog.append(
@@ -366,6 +368,17 @@ public class Build {
         outputLog.setLength(0);
     }
 
+    public void execute(ArrayList<ArrayList<String>> codigIn) {
+        vm = new MaquinaVirtual(parent);
+        vm.setCodigIn(codigIn);
+        vm.execute();
+    }
+
+    public void buildIn(ArrayList<ArrayList<String>> codigIn) {
+        vm = new MaquinaVirtual(parent);
+        vm.setCodigIn(codigIn);
+        vm.showcodigInFrame();
+    }
 
 
 

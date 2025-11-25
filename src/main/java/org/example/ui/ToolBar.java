@@ -118,7 +118,7 @@ public class ToolBar extends JToolBar {
     public void buildCode() {
         if (parent.getFileManager().saveInSecondChance()) {
             clearAll();
-            parent.build.buildCode();
+            parent.build.buildCode(false);
         } else {
             JOptionPane.showMessageDialog(parent, "Utilize o botão 'executar' para compilar sem salvar");
         }
@@ -150,7 +150,7 @@ public class ToolBar extends JToolBar {
 
     public void runCode() {
         clearAll();
-        parent.build.buildCode();
+        parent.build.buildCode(true);
     }
 
     private void updateCompileEnabled() {
